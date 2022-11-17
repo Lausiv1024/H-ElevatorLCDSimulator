@@ -19,6 +19,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using static System.Net.WebRequestMethods;
 using System.IO;
+using System.Threading;
 
 namespace UrbanAce_7
 {
@@ -45,6 +46,7 @@ namespace UrbanAce_7
 
         private int InfoLang = 0;//0:JP1:US
         TranslatableInfoText curInfoText;
+        DispatcherTimer infoUpdateTimer;
 
         public int arrowMotion { get { return arMotion; } set
             {
@@ -76,20 +78,6 @@ namespace UrbanAce_7
             FloorName.FontStyle = FontStyles.Italic;
             InfoGrid.Children.Add(webView);
             direction = ElevatorDirection.UP;
-            webView.CoreWebView2InitializationCompleted += (s, a) =>
-            {
-                if (!a.IsSuccess) return;
-                webView.IsEnabled = false;
-            };
-
-            var infoUpdateTimer = new DispatcherTimer();
-            infoUpdateTimer.Interval = new TimeSpan(0, 0, 4);
-            infoUpdateTimer.Tick += (s, e) =>
-            {
-                InfoLang = 1 - InfoLang;
-                setInfoText(curInfoText);
-            };
-            infoUpdateTimer.Start();
         }
         private async Task PostInit()//PostInit is called on Loaded event
         {
@@ -97,7 +85,22 @@ namespace UrbanAce_7
             elementFadeIn(ArrowRenderer.Children[0]);
             elementFadeIn(FloorName);
             setInfoText(TranslatableInfoText.NextFloor);
+            if (webView == null) webView = new WebView2();
+            webView.CoreWebView2InitializationCompleted += (s, a) =>
+            {
+                if (!a.IsSuccess) return;
+                webView.IsEnabled = false;
+            };
             await setWebView("https://example.com");
+
+            infoUpdateTimer = new DispatcherTimer();
+            infoUpdateTimer.Interval = new TimeSpan(0, 0, 4);
+            infoUpdateTimer.Tick += (s, e) =>
+            {
+                InfoLang = 1 - InfoLang;
+                setInfoText(curInfoText);
+            };
+            infoUpdateTimer.Start();
         }
 
         public void drawArrow(bool isDown)
@@ -301,6 +304,16 @@ namespace UrbanAce_7
                 await webView.EnsureCoreWebView2Async();
             string completedHTML = Properties.Resources.Embed.Replace("{movieID}", MovID);
             webView.CoreWebView2.NavigateToString(completedHTML);
+        }
+
+        public async Task FadeOut()
+        {
+            if (ArrowRenderer.Children.Count != 0)
+                elementFadeOut(ArrowRenderer.Children[0]);
+            elementFadeOut(FloorName);
+            await Task.Delay(600);
+            ArrowRenderer.Children.Clear();
+            infoUpdateTimer?.Stop();
         }
     }
 }

@@ -4,18 +4,24 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:UrbanAce_7"
-      mc:Ignorable="d" Loaded="Page_Loaded"
+      mc:Ignorable="d" Loaded="PostInit"
       d:DesignHeight="600" d:DesignWidth="500"
       Title="FullScreen">
-    <Grid Background="White">
+    <Grid Background="{Binding Background}" Margin="0,-60,0,-60">
         <Grid.RowDefinitions>
+            <RowDefinition Height="100"/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition Height="100"/>
-            <RowDefinition Height="48"/>
+            <RowDefinition Height="108"/>
         </Grid.RowDefinitions>
-        <Canvas x:Name="ArrowRenderer"/>
-        <TextBlock x:Name="FloorText" Text="1" Grid.Row="1" FontFamily="Segoe UI" FontWeight="SemiBold"
-                   FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="256"/>
+        <Canvas x:Name="ArrowRenderer" Grid.Row="1" Margin="155,16" Background="{Binding Background}"/>
+        <TextBlock x:Name="FloorText" Text="1" Grid.Row="2" FontFamily="Segoe UI" FontWeight="SemiBold" Foreground="{Binding Foreground}"
+                   FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="220"/>
+        <TextBlock Name="InfoText" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                   FontFamily="BIZ UDゴシック" Text="" Margin="20" FontSize="42" FontWeight="Bold"/>
+        <Grid Background="Gray" Grid.Row="4">
+
+        </Grid>
     </Grid>
 </Page>

@@ -27,15 +27,44 @@ namespace UrbanAce_7
         private static extern short GetKeyState(int nVirtKey);
 
         public static readonly string MainTitle = "Urban Ace";
+        public static MainWindow Instance { get; private set; }
+
+        private const int WinWidth = 500;
+        private const int WinHeight = 600;
+
 
         //Setting : 0  Full : 1  WithContents:2
         private int displayMode = 2;
 
         private bool isCtrlPressed => GetKeyState(0xA2) < 0 || GetKeyState(0xA3) < 0;
 
+        private WithContent WithContent { get; set; }
+        private FullScreen FullScreen { get; set; }
+
+        private bool IsResizable { get
+            {
+                return ResizeMode == ResizeMode.CanResize;
+            }
+            set {
+                ResizeMode = value ? ResizeMode.CanResize : ResizeMode.CanMinimize;
+                if (!value) 
+                {
+                    WindowState = WindowState.Normal;
+                    Height = WinHeight;
+                    Width = WinWidth;
+                }
+            }
+        }
+
+        private bool animationRunning = false;
+
         public MainWindow()
         {
             InitializeComponent();
+            Instance = this;
+            WithContent = new WithContent();
+            FullScreen = new FullScreen();
+            NavigationService.Navigate(FullScreen);
         }
 
         private async void NavigationWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -81,27 +110,31 @@ namespace UrbanAce_7
             }
             if (e.Key == Key.F && isCtrlPressed)
             {
-                displayMode = displayMode == 0 ? 2 : 0;
+                if (displayMode == 0) return;
+                displayMode = 0;
+                IsResizable = true;
                 Title = displayMode == 0 ? $"{MainTitle} -- 設定" : MainTitle;
-                switch (displayMode) 
+                var setting = new Setting();
+                NavigationService.Navigate(setting);
+            }
+            if (e.Key == Key.S && isCtrlPressed)
+            {
+                if (animationRunning) return;
+                animationRunning = true;
+                IsResizable = false;
+                if (displayMode == 0) displayMode = 1;
+                else displayMode = displayMode == 1 ? 2 : 1;
+                if (displayMode == 2)
                 {
-                    case 0:
-                        WithContent.INSTANCE.FloorName.Focus();
-                        WithContent.INSTANCE.webView.Dispose();
-                        WithContent.INSTANCE.webView = null;
-                        var c = new Setting();
-                        NavigationService.Navigate(c);
-                        ResizeMode = ResizeMode.CanResize;
-                        break;
-                    case 2:
-                        WindowState = WindowState.Normal;
-                        Width = 500;
-                        Height = 600;
-                        ResizeMode = ResizeMode.CanMinimize;
-                        var wc = new WithContent();
-                        NavigationService.Navigate(wc);
-                        break;
+                    FullScreen.FadeOut();
+                    await Task.Delay(600);
+                    NavigationService.Navigate(WithContent);
+                } else if (displayMode == 1)
+                {
+                    await WithContent.FadeOut();
+                    NavigationService.Navigate(FullScreen);
                 }
+                animationRunning = false;
             }
             if (e.Key == Key.K)
             {
@@ -118,6 +151,29 @@ namespace UrbanAce_7
                 WithContent.INSTANCE.DoArrowAnim();
             }
             if (e.Key == Key.Escape) this.Close();
+        }
+
+        private void SetPanel(int Id)
+        {
+            switch (Id)
+            {
+                case 0:
+                    WithContent.INSTANCE.FloorName.Focus();
+                    WithContent.INSTANCE.webView.Dispose();
+                    WithContent.INSTANCE.webView = null;
+                    var c = new Setting();
+                    NavigationService.Navigate(c);
+                    ResizeMode = ResizeMode.CanResize;
+                    break;
+                case 2:
+                    WindowState = WindowState.Normal;
+                    Width = 500;
+                    Height = 600;
+                    ResizeMode = ResizeMode.CanMinimize;
+                    var wc = new WithContent();
+                    NavigationService.Navigate(wc);
+                    break;
+            }
         }
     }
 }

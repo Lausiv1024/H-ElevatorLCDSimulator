@@ -19,5 +19,11 @@ namespace UrbanAce_7
             return "th";
         }
         public static string ToOrdinalNum(int i) => i + Ordinal(i);
+
+        public enum FadeType
+        {
+            IN,
+            OUT
+        }
     }
 }

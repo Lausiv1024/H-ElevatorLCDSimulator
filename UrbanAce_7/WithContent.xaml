@@ -38,7 +38,7 @@
         <TextBlock Name="Ord" Grid.Row="1" FontSize="40" Foreground="{Binding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                    FontFamily="Segoe UI" FontWeight="SemiBold" Text="" Margin="6"/>
 
-        <Grid Grid.Row="2" Background="#329DEF" Name="InfoGrid">
+        <Grid Grid.Row="2" Name="InfoGrid">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="100"/>
