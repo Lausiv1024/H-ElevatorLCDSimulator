@@ -39,7 +39,7 @@
                    FontFamily="Segoe UI" FontWeight="SemiBold" Text="" Margin="6"/>
 
         <Grid Grid.Row="2" Name="InfoGrid">
-            <Grid>
+            <Grid Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="100"/>
                     <RowDefinition/>

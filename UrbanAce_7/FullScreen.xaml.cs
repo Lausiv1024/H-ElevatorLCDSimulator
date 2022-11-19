@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -50,12 +51,13 @@ namespace UrbanAce_7
             DataContext = new DesignData { Foreground = f, Background = b };
             FloorText.Opacity = 0;
         }
-        private void PostInit(object sender, RoutedEventArgs e)
+        private async void PostInit(object sender, RoutedEventArgs e)
         {
             if (Direction == ElevatorDirection.DOWN) SwitchElements();
             var a = CreateArrowImg(ArrowImgSize, Direction == ElevatorDirection.DOWN ? 180 : 0);
             a.Opacity = 0;
             ArrowRenderer.Children.Add(a);
+            await Task.Delay(100);
             FadeElement(FloorText, 200, UAUtil.FadeType.IN);
             FadeElement(ArrowRenderer.Children[0], 200, UAUtil.FadeType.IN);
         }

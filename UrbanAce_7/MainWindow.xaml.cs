@@ -1,20 +1,10 @@
-﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Web.WebView2.Wpf;
+﻿using Microsoft.Web.WebView2.Wpf;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Runtime.InteropServices;
 
 namespace UrbanAce_7
 {
@@ -23,7 +13,7 @@ namespace UrbanAce_7
     /// </summary>
     public partial class MainWindow : NavigationWindow
     {
-        [DllImport("user32.dll")] 
+        [DllImport("user32.dll")]
         private static extern short GetKeyState(int nVirtKey);
 
         public static readonly string MainTitle = "Urban Ace";
@@ -40,14 +30,14 @@ namespace UrbanAce_7
 
         private WithContent WithContent { get; set; }
         private FullScreen FullScreen { get; set; }
+        private Setting Setting { get; set; }
 
-        private bool IsResizable { get
+        private bool IsResizable
+        {
+            set
             {
-                return ResizeMode == ResizeMode.CanResize;
-            }
-            set {
                 ResizeMode = value ? ResizeMode.CanResize : ResizeMode.CanMinimize;
-                if (!value) 
+                if (!value)
                 {
                     WindowState = WindowState.Normal;
                     Height = WinHeight;
@@ -64,7 +54,9 @@ namespace UrbanAce_7
             Instance = this;
             WithContent = new WithContent();
             FullScreen = new FullScreen();
-            NavigationService.Navigate(FullScreen);
+            Setting = new Setting();
+            NavigationService.Navigate(Setting);
+            IsResizable = true;
         }
 
         private async void NavigationWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -72,9 +64,9 @@ namespace UrbanAce_7
             await deleteWebViewData();
             try
             {
-                if (WithContent.INSTANCE == null || WithContent.INSTANCE.Content != null) return;
-                WithContent.INSTANCE.webView.Dispose();
-            } catch{}
+                if (WithContent == null || WithContent.Content != null) return;
+                WithContent.webView.Dispose();
+            } catch { }
         }
 
         private async Task deleteWebViewData()

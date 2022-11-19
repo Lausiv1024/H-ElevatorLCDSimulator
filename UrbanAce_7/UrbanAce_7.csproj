@@ -74,12 +74,14 @@
     <Compile Include="ElevatorDirection.cs" />
     <Compile Include="ElevatorScreen.cs" />
     <Compile Include="MainDesign.cs" />
+    <Compile Include="NumericBox.cs" />
     <Compile Include="Setting.xaml.cs">
       <DependentUpon>Setting.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestInterface.cs" />
     <Compile Include="TranslatableText.cs" />
     <Compile Include="UAUtil.cs" />
+    <Compile Include="Win32API.cs" />
     <Compile Include="WithContent.xaml.cs">
       <DependentUpon>WithContent.xaml</DependentUpon>
     </Compile>
@@ -105,6 +107,10 @@
     <Page Include="Setting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="WithContent.xaml">
       <SubType>Designer</SubType>

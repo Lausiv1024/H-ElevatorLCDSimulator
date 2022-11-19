@@ -5,9 +5,120 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:UrbanAce_7"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="600" d:DesignWidth="500"
       Title="Setting">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="64"/>
+        </Grid.RowDefinitions>
+        <TabControl>
+            <TabItem Header="階層設定">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Border>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="0.7*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="サービス可能階の設定" Margin="8" FontSize="16"/>
+                            <ListBox x:Name="FloorList" Grid.Row="1" Margin="8,0" d:ItemsSource="{d:SampleData ItemCount=5}"/>
+                            <Grid Grid.Row="2" Margin="8,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="FloorUP" Content="🔺" Click="FloorUP_Click"/>
+                                <Button x:Name="FloorDown" Grid.Column="1" Content="🔻" Click="FloorDown_Click"/>
+                            </Grid>
+                            <StackPanel Grid.Row="3" Margin="8">
+                                <TextBlock Text="追加" FontSize="16"/>
+                                <TextBlock Text="連番" Margin="0,6"/>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="~" Grid.Column="1" HorizontalAlignment="Center" FontSize="16"/>
+                                    <local:NumericBox x:Name="StartF"/>
+                                    <local:NumericBox x:Name="EndF" Grid.Column="2"/>
+                                    <Button x:Name="AddSerial" Grid.Column="3" Content="追加" Margin="6,0"
+                                        Click="AddSerial_Click">
+                                        <Button.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem x:Name="BasementFloor" Header="地下" Click="BasementFloor_Click"/>
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                    </Button>
+                                </Grid>
+                                <TextBlock Text="任意の文字(最大3文字,1バイト文字のみ)" Margin="8,0"/>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="64"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="FloorS" Margin="0,6" InputMethod.IsInputMethodEnabled="False"
+                                         CommandManager.PreviewExecuted="FloorS_PreviewExecuted"/>
+                                    <Button x:Name="AddFloor" Grid.Column="1" Margin="8,6" Content="追加" Click="AddFloor_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="停止する階の設定" Margin="8" FontSize="16"/>
+                            <TextBlock Name="TopFloor" Grid.Row="1" Text="最上階:" FontSize="16" Margin="8"/>
+                            <TextBlock Grid.Row="2" Text="途中階" Margin="8"/>
+                            <ListBox x:Name="MiddleFloor" Grid.Row="3" Margin="8,0" d:ItemsSource="{d:SampleData ItemCount=5}"/>
+                            <Button x:Name="AddMiddleFloor" Grid.Row="4" Content="+" FontSize="16" Margin="8,0" Click="AddMiddleFloor_Click"/>
+                            <TextBlock Name="LowFloor" Grid.Row="5" Text="最下:" Margin="8" FontSize="16"/>
+                            <StackPanel Grid.Row="6" Margin="8">
+                                <CheckBox x:Name="EnableReturning" Content="往復運転" Margin="0,4"/>
+                                <CheckBox x:Name="Loop" Content="無限ループ" IsEnabled="{Binding ElementName=EnableReturning, Path=IsChecked}" Margin="0,4"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="運行速度:"/>
+                                    <ComboBox x:Name="Speed" Grid.Column="1"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+            <TabItem Header="コンテンツ設定">
+                
+            </TabItem>
+        </TabControl>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="開始遅延(s):" Margin="6"/>
+                <local:NumericBox x:Name="StartDelayTime" Margin="6"/>
+            </StackPanel>
+            <Button x:Name="StartButton" Grid.Column="1" Content="開始" Margin="8"/>
+        </Grid>
     </Grid>
 </Page>

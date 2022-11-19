@@ -20,6 +20,8 @@ namespace UrbanAce_7
         }
         public static string ToOrdinalNum(int i) => i + Ordinal(i);
 
+        public static int[] Speeds = new int[] {60, 150,240,300};
+
         public enum FadeType
         {
             IN,

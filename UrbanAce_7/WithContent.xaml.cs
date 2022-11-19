@@ -1,25 +1,13 @@
-﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Web.WebView2.Wpf;
+﻿using Microsoft.Web.WebView2.Wpf;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using static System.Net.WebRequestMethods;
-using System.IO;
-using System.Threading;
 
 namespace UrbanAce_7
 {
@@ -48,12 +36,15 @@ namespace UrbanAce_7
         TranslatableInfoText curInfoText;
         DispatcherTimer infoUpdateTimer;
 
-        public int arrowMotion { get { return arMotion; } set
+        public int arrowMotion
+        {
+            get { return arMotion; }
+            set
             {
                 if (arMotion < 0) return;
 
                 arMotion = value;
-            } 
+            }
         }
 
         public WithContent()
@@ -66,13 +57,13 @@ namespace UrbanAce_7
         {
             INSTANCE = this;
             webView = new WebView2();
-            Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", 
+            Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
                 "--autoplay-policy=no-user-gesture-required");
             Loaded += async (s, e) => await PostInit();
         }
         private void Init()
         {
-            DataContext = new DesignData{Foreground = f, Background = b};//背景、メインの色を設定
+            DataContext = new DesignData { Foreground = f, Background = b };//背景、メインの色を設定
             FloorName.FontFamily = new FontFamily(FLOOR_FONT);
             FloorName.FontWeight = FontWeights.SemiBold;
             FloorName.FontStyle = FontStyles.Italic;
@@ -142,16 +133,15 @@ namespace UrbanAce_7
             Info1.Text = InfoLang == 0 ? txt.JP : txt.US;
             if (int.TryParse(NextFloor.Text, out int floorNum) && InfoLang == 1 && curInfoText.infoType == TranslatableInfoText.InfoType.FLOOR)
             {
-                int spaceCount =(int)(8 + NextFloor.Text.Length * 1.6);
+                int spaceCount = (int)(8 + NextFloor.Text.Length * 1.6);
                 string ordText = "";
                 for (int i = 0; i < spaceCount; i++) ordText += " ";
                 ordText += UAUtil.Ordinal(floorNum);
                 Ord.Text = ordText;
-            }
-            else Ord.Text = string.Empty;
+            } else Ord.Text = string.Empty;
         }
 
-        private Image createArrowImg(double size)=> createArrowImg(size, 0);
+        private Image createArrowImg(double size) => createArrowImg(size, 0);
         private void elementFadeIn(UIElement element)
         {
             element.Opacity = 0;
@@ -236,14 +226,15 @@ namespace UrbanAce_7
 
             Canvas.SetTop(nextArrow, NextArrowStartPos);
             ArrowRenderer.Children.Add(nextArrow);
-            MoveElementTop(prevArrow, 0, PrevArrowEndPos, mvTime, () => { 
+            MoveElementTop(prevArrow, 0, PrevArrowEndPos, mvTime, () =>
+            {
                 ArrowRenderer.Children.Remove(prevArrow);
                 isAnimating = false;
             });
             MoveElementTop(nextArrow, NextArrowStartPos, 0, mvTime);
         }
 
-        private void MoveElementTop(UIElement element, double from, double to, double millSecDuration)=> 
+        private void MoveElementTop(UIElement element, double from, double to, double millSecDuration) =>
             MoveElementTop(element, from, to, millSecDuration, null);
         private void MoveElementTop(UIElement element, double from, double to, double millSecDuration, Action onCompleted)
         {
