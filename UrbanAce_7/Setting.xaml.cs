@@ -21,6 +21,8 @@ namespace UrbanAce_7
     /// </summary>
     public partial class Setting : Page
     {
+        private int startPos = 0;//0:UP 1:DW
+
         public Setting()
         {
             InitializeComponent();
@@ -78,7 +80,7 @@ namespace UrbanAce_7
             addToMiddlefloorList.Header = "中間停止階として設定";
             addToMiddlefloorList.Click += (s, e) =>
             {
-                CreateMiddleFloorItem(getFloorName(FloorList.SelectedIndex));
+                CreateMiddleFloorItem(GetFloorName(FloorList.SelectedIndex));
             };
 
             i.ContextMenu.Items.Add(del);
@@ -86,7 +88,7 @@ namespace UrbanAce_7
             return i;
         }
 
-        private ListBoxItem copy(ListBoxItem item) => createListBoxItem((string)item.Content);
+        private ListBoxItem Copy(ListBoxItem item) => createListBoxItem((string)item.Content);
 
         private bool CheckAlreadyExists(string Name)
         {
@@ -98,7 +100,7 @@ namespace UrbanAce_7
             return false;
         }
 
-        private string getFloorName(int index)
+        private string GetFloorName(int index)
         {
             var a = FloorList.Items[index] as ListBoxItem;
             return (string) a.Content;
@@ -130,7 +132,7 @@ namespace UrbanAce_7
         {
             if (FloorList.SelectedIndex < 1) return;
             var index = FloorList.SelectedIndex;
-            var i = copy((ListBoxItem)FloorList.Items[index]);
+            var i = Copy((ListBoxItem)FloorList.Items[index]);
             FloorList.Items.RemoveAt(index);
             index--;
             FloorList.Items.Insert(index, i);
@@ -142,7 +144,7 @@ namespace UrbanAce_7
         {
             if (FloorList.SelectedIndex < 0 || FloorList.SelectedIndex > FloorList.Items.Count - 2) return;
             var index = FloorList.SelectedIndex;
-            var i = copy((ListBoxItem)FloorList.Items[index]);
+            var i = Copy((ListBoxItem)FloorList.Items[index]);
             FloorList.Items.RemoveAt(index);
             index++;
             FloorList.Items.Insert(index, i);
@@ -153,8 +155,8 @@ namespace UrbanAce_7
         private void SetTopAndBottomFloor()
         {
             if (FloorList.Items.Count == 0) return;
-            TopFloor.Text = $"最上階:{getFloorName(FloorList.Items.Count - 1)}";
-            LowFloor.Text = $"最下層:{getFloorName(0)}";
+            TopFloor.Text = $"最上階:{GetFloorName(FloorList.Items.Count - 1)}";
+            LowFloor.Text = $"最下層:{GetFloorName(0)}";
         }
 
         private void CreateMiddleFloorItem() => CreateMiddleFloorItem("");
@@ -206,6 +208,32 @@ namespace UrbanAce_7
         private void AddMiddleFloor_Click(object sender, RoutedEventArgs e)
         {
             CreateMiddleFloorItem();
+        }
+
+        private string[] ConvertFloorListToArray()
+        {
+            string[] array = new string[FloorList.Items.Count];
+            int i = 0;
+            foreach(var floor in FloorList.Items)
+            {
+                array[i++] = ((ListBoxItem)floor).Content as string;
+            }
+            return array;
+        }
+
+        private async void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (FloorList.Items.Count < 2) return;
+            var context = new SimulationContext { AvailableFloors = ConvertFloorListToArray(), 
+                RoundTrip =(bool) RoundTrip.IsChecked,Loop = RoundTrip.IsChecked == true ?(bool) Loop.IsChecked : false, startPos = startPos};
+            await MainWindow.Instance.DoSimulation(context, StartDelayTime.Value);
+        }
+
+        private void StartPos_Click(object sender, RoutedEventArgs e)
+        {
+            startPos = 1 - startPos;
+            var a = startPos == 1 ? '下' : '上';
+            StartPos.Content = $"開始位置:{a}";
         }
     }
 }

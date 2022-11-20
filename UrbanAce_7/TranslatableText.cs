@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UrbanAce_7
 {
-    internal class TranslatableInfoText
+    public class TranslatableInfoText
     {
         public static TranslatableInfoText DoorClose = new TranslatableInfoText("ドアがしまります", "Door Closing", InfoType.DOOR);
         public static TranslatableInfoText DoorOpen = new TranslatableInfoText("ドアがひらきます", "Door Opening", InfoType.DOOR);

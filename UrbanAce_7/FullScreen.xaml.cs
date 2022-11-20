@@ -19,8 +19,8 @@ namespace UrbanAce_7
         readonly string INFO_US_FONT = "Segoe_UI";
         readonly string INFO_JP_FONT = "BIZ UDゴシック";
         public int InfoLang = 0;
-        private TranslatableInfoText curInfoText;
-        ElevatorDirection Direction;
+        private TranslatableInfoText curInfoText = TranslatableInfoText.Empty;
+        public ElevatorDirection Direction;
 
         public static FullScreen Instance { get; private set; }
         public static bool IsInstanceCreated => Instance != null;
@@ -40,7 +40,7 @@ namespace UrbanAce_7
             timer.Tick += (s, e) =>
             {
                 InfoLang = 1 - InfoLang;
-                UpdateInfoText(TranslatableInfoText.Empty);
+                UpdateInfoText(curInfoText);
             };
             timer.Start();
             Direction = ElevatorDirection.UP;
@@ -86,7 +86,7 @@ namespace UrbanAce_7
         private int infoFontSize => InfoLang == 0 ? 42 : 50;
         private int infoMargin => InfoLang == 0 ? 20 : 12;
 
-        private void UpdateInfoText(TranslatableInfoText text)
+        public void UpdateInfoText(TranslatableInfoText text)
         {
             curInfoText = text;
             InfoText.FontFamily = InfoLang == 0 ? new FontFamily(INFO_JP_FONT) : new FontFamily(INFO_US_FONT);
@@ -110,11 +110,19 @@ namespace UrbanAce_7
             storyboard.Begin();
         }
 
+        public void updateArrow(ElevatorDirection direction)
+        {
+            Direction = direction;
+            ArrowRenderer.Children.Clear();
+            CreateArrowImg(ArrowImgSize, Direction == ElevatorDirection.DOWN ? 180 : 0);
+            if (direction == ElevatorDirection.DOWN) SwitchElements();
+        }
+
         public void FadeOut()
         {
-            FadeElement(FloorText, 200, UAUtil.FadeType.OUT);
+            FadeElement(FloorText, 100, UAUtil.FadeType.OUT);
             if (ArrowRenderer.Children.Count != 0)
-                FadeElement(ArrowRenderer.Children[0], 200, UAUtil.FadeType.OUT);
+                FadeElement(ArrowRenderer.Children[0], 100, UAUtil.FadeType.OUT);
         }
     }
 }

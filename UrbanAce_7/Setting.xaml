@@ -90,8 +90,9 @@
                             <Button x:Name="AddMiddleFloor" Grid.Row="4" Content="+" FontSize="16" Margin="8,0" Click="AddMiddleFloor_Click"/>
                             <TextBlock Name="LowFloor" Grid.Row="5" Text="最下:" Margin="8" FontSize="16"/>
                             <StackPanel Grid.Row="6" Margin="8">
-                                <CheckBox x:Name="EnableReturning" Content="往復運転" Margin="0,4"/>
-                                <CheckBox x:Name="Loop" Content="無限ループ" IsEnabled="{Binding ElementName=EnableReturning, Path=IsChecked}" Margin="0,4"/>
+                                <CheckBox x:Name="RoundTrip" Content="往復運転" Margin="0,4"/>
+                                <CheckBox x:Name="Loop" Content="無限ループ" IsEnabled="{Binding ElementName=RoundTrip, Path=IsChecked}" Margin="0,4"/>
+                                <Button x:Name="StartPos" Content="開始位置:上" Margin="0,4" Click="StartPos_Click"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="60"/>
@@ -118,7 +119,7 @@
                 <TextBlock Text="開始遅延(s):" Margin="6"/>
                 <local:NumericBox x:Name="StartDelayTime" Margin="6"/>
             </StackPanel>
-            <Button x:Name="StartButton" Grid.Column="1" Content="開始" Margin="8"/>
+            <Button x:Name="StartButton" Grid.Column="1" Content="開始" Margin="8" Click="StartButton_Click"/>
         </Grid>
     </Grid>
 </Page>

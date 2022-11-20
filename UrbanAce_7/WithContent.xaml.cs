@@ -35,8 +35,9 @@ namespace UrbanAce_7
         private int InfoLang = 0;//0:JP1:US
         TranslatableInfoText curInfoText;
         DispatcherTimer infoUpdateTimer;
+        DispatcherTimer ArrowTimer;
 
-        public int arrowMotion
+        public int ArrowMotion
         {
             get { return arMotion; }
             set
@@ -44,6 +45,19 @@ namespace UrbanAce_7
                 if (arMotion < 0) return;
 
                 arMotion = value;
+                if (value == 2)
+                {
+                    ArrowTimer.Start();
+                    DoArrowAnim();
+                }else if (value == 1)
+                {
+                    ArrowTimer.Interval = TimeSpan.FromMilliseconds(2000);
+                    DoArrowAnim();
+                }
+                else
+                {
+                    ArrowTimer.Stop();
+                }
             }
         }
 
@@ -60,6 +74,9 @@ namespace UrbanAce_7
             Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
                 "--autoplay-policy=no-user-gesture-required");
             Loaded += async (s, e) => await PostInit();
+            ArrowTimer = new DispatcherTimer();
+            ArrowTimer.Interval = TimeSpan.FromMilliseconds(900);
+            ArrowTimer.Tick += (s, e) => DoArrowAnim();
         }
         private void Init()
         {
@@ -82,7 +99,8 @@ namespace UrbanAce_7
                 if (!a.IsSuccess) return;
                 webView.IsEnabled = false;
             };
-            await setWebView("https://example.com");
+            //await setWebView("https://example.com");
+            await setYoutubeEnbedContent("Cy82ox6K_AY");
 
             infoUpdateTimer = new DispatcherTimer();
             infoUpdateTimer.Interval = new TimeSpan(0, 0, 4);
@@ -122,7 +140,7 @@ namespace UrbanAce_7
 
         private int infoMargin => InfoLang == 0 ? 12 : 4;
         private int infoFontSize => InfoLang == 0 ? 42 : 50;
-        private void setInfoText(TranslatableInfoText txt)
+        public void setInfoText(TranslatableInfoText txt)
         {
             curInfoText = txt;
             Info1.FontFamily = InfoLang == 0 ? new FontFamily(INFO_JP_FONT) : new FontFamily(INFO_US_FONT);
@@ -131,6 +149,13 @@ namespace UrbanAce_7
             Info1.FontSize = infoFontSize;
 
             Info1.Text = InfoLang == 0 ? txt.JP : txt.US;
+            if (txt.infoType == TranslatableInfoText.InfoType.FLOOR)
+            {
+                NextFloor.Visibility = Visibility.Visible;
+            } else
+            {
+                NextFloor.Visibility = Visibility.Hidden;
+            }
             if (int.TryParse(NextFloor.Text, out int floorNum) && InfoLang == 1 && curInfoText.infoType == TranslatableInfoText.InfoType.FLOOR)
             {
                 int spaceCount = (int)(8 + NextFloor.Text.Length * 1.6);
@@ -155,16 +180,17 @@ namespace UrbanAce_7
             storyBoard.Children.Add(da);
 
             storyBoard.Begin();
+            
         }
 
-        private void elementFadeOut(UIElement element) => elementFadeOut(element, null);
+        private void elementFadeOut(UIElement element, int millSec) => elementFadeOut(element, millSec, null);
 
         /// <summary>
         /// UI要素をフェードアウトさせる。
         /// </summary>
         /// <param name="element"></param>
         /// <param name="onFadeouted"></param>
-        private void elementFadeOut(UIElement element, Action onFadeouted)
+        private void elementFadeOut(UIElement element,int millSec, Action onFadeouted)
         {
             element.Opacity = 1;
             var storyBoard = new Storyboard();
@@ -173,7 +199,7 @@ namespace UrbanAce_7
             Storyboard.SetTargetProperty(da, new PropertyPath(OpacityProperty));
             da.From = 1.0;
             da.To = 0.0;
-            da.Duration = TimeSpan.FromMilliseconds(200);
+            da.Duration = TimeSpan.FromMilliseconds(millSec);
             storyBoard.Completed += (s, e) =>
             {
                 onFadeouted?.Invoke();
@@ -184,17 +210,14 @@ namespace UrbanAce_7
 
         private void Page_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Right) c--;
-            else c++;
-            updateFloor(c);
         }
 
-        private void updateFloor(int fl)
+        public void updateFloor(string fl)
         {
             setFloorText("");
             delayDo(50, () =>
             {
-                setFloorText(fl.ToString());
+                setFloorText(fl);
                 elementFadeIn(FloorName);
             });
         }
@@ -265,7 +288,7 @@ namespace UrbanAce_7
             if (d == ElevatorDirection.NONE)
             {
                 if (ArrowRenderer.Children.Count == 0) return;
-                elementFadeOut(ArrowRenderer.Children[0], () => ArrowRenderer.Children.Clear());
+                elementFadeOut(ArrowRenderer.Children[0],200, () => ArrowRenderer.Children.Clear());
             } else
             {
                 ArrowRenderer.Children.Clear();
@@ -293,18 +316,19 @@ namespace UrbanAce_7
         {
             if (this.webView.CoreWebView2 is null)
                 await webView.EnsureCoreWebView2Async();
-            string completedHTML = Properties.Resources.Embed.Replace("{movieID}", MovID);
+            string completedHTML = Properties.Resources.EmbedMute.Replace("{movieID}", MovID);
             webView.CoreWebView2.NavigateToString(completedHTML);
         }
 
         public async Task FadeOut()
         {
             if (ArrowRenderer.Children.Count != 0)
-                elementFadeOut(ArrowRenderer.Children[0]);
-            elementFadeOut(FloorName);
+                elementFadeOut(ArrowRenderer.Children[0],100);
+            elementFadeOut(FloorName,100);
             await Task.Delay(600);
             ArrowRenderer.Children.Clear();
             infoUpdateTimer?.Stop();
+            ArrowMotion = 0;
         }
     }
 }

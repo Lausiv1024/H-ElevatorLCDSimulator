@@ -1,5 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Wpf;
+using NAudio.Wave;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,9 +24,11 @@ namespace UrbanAce_7
         private const int WinWidth = 500;
         private const int WinHeight = 600;
 
+        WaveOut WaveOut;
 
-        //Setting : 0  Full : 1  WithContents:2
-        private int displayMode = 2;
+
+        //Full:0,Withcontent:1
+        private int displayMode = 0;
 
         private bool isCtrlPressed => GetKeyState(0xA2) < 0 || GetKeyState(0xA3) < 0;
 
@@ -57,11 +61,12 @@ namespace UrbanAce_7
             Setting = new Setting();
             NavigationService.Navigate(Setting);
             IsResizable = true;
+            WaveOut = new WaveOut();
         }
 
         private async void NavigationWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            await deleteWebViewData();
+            await DeleteWebViewData();
             try
             {
                 if (WithContent == null || WithContent.Content != null) return;
@@ -69,14 +74,14 @@ namespace UrbanAce_7
             } catch { }
         }
 
-        private async Task deleteWebViewData()
+        private async Task DeleteWebViewData()
         {
             if (!WithContent.isInstanceCreated) return;
             WebView2 webview = WithContent.INSTANCE.webView;
             try
             {
                 if (webview == null || webview.CoreWebView2 is null) return;
-
+                
                 var p = webview.CoreWebView2.Profile;
                 await p.ClearBrowsingDataAsync();
             } catch (ObjectDisposedException de)
@@ -109,25 +114,25 @@ namespace UrbanAce_7
                 var setting = new Setting();
                 NavigationService.Navigate(setting);
             }
-            if (e.Key == Key.S && isCtrlPressed)
-            {
-                if (animationRunning) return;
-                animationRunning = true;
-                IsResizable = false;
-                if (displayMode == 0) displayMode = 1;
-                else displayMode = displayMode == 1 ? 2 : 1;
-                if (displayMode == 2)
-                {
-                    FullScreen.FadeOut();
-                    await Task.Delay(600);
-                    NavigationService.Navigate(WithContent);
-                } else if (displayMode == 1)
-                {
-                    await WithContent.FadeOut();
-                    NavigationService.Navigate(FullScreen);
-                }
-                animationRunning = false;
-            }
+            //if (e.Key == Key.S && isCtrlPressed)
+            //{
+            //    if (animationRunning) return;
+            //    animationRunning = true;
+            //    IsResizable = false;
+            //    if (displayMode == 0) displayMode = 1;
+            //    else displayMode = displayMode == 1 ? 2 : 1;
+            //    if (displayMode == 2)
+            //    {
+            //        FullScreen.FadeOut();
+            //        await Task.Delay(600);
+            //        NavigationService.Navigate(WithContent);
+            //    } else if (displayMode == 1)
+            //    {
+            //        await WithContent.FadeOut();
+            //        NavigationService.Navigate(FullScreen);
+            //    }
+            //    animationRunning = false;
+            //}
             if (e.Key == Key.K)
             {
                 ElevatorDirection d = WithContent.INSTANCE.direction;
@@ -166,6 +171,109 @@ namespace UrbanAce_7
                     NavigationService.Navigate(wc);
                     break;
             }
+        }
+
+        private string AudioResourceDirectoryPath => $"{Directory.GetCurrentDirectory()}\\resources\\";
+
+        private bool PlayFloorArriveSound(string floorName)
+        {
+            string filePath = AudioResourceDirectoryPath + floorName + ".mp3";
+            return PlaySound(filePath);
+        }
+
+        private void PlayFloorArriveSoundAndPlayOpen(string floorName)
+        {
+            if (PlayFloorArriveSound(floorName))
+                WaveOut.PlaybackStopped += wait;
+        }
+
+        private async void wait(object s, StoppedEventArgs e)
+        {
+            await Task.Delay(800);
+            PlayDoorAnnounce(0);
+            WaveOut.PlaybackStopped -= wait;
+        }
+
+        private void PlayUpDownSound(int mode)
+        {
+            string type = mode == 0 ? "Up" : "Down";
+            string filePath = AudioResourceDirectoryPath + type + ".mp3";
+            PlaySound(filePath);
+        }
+
+        private void PlayDoorAnnounce(int mode)
+        {
+            string type = mode == 0 ? "Open" : "Close";
+            string filePath = AudioResourceDirectoryPath +
+                type + ".mp3";
+            PlaySound(filePath);
+        }
+        private bool PlaySound(string path)
+        {
+            if (!File.Exists(path)) return false;
+            var aReader = new AudioFileReader(path);
+            WaveOut.Init(aReader);
+            WaveOut.Play();
+            return true;
+        }
+
+        private async Task SwitchDisplay(int mode)
+        {
+            if (mode == 1)
+            {
+                FullScreen.FadeOut();
+                await Task.Delay(600);
+                NavigationService.Navigate(WithContent);
+            } else
+            {
+                await WithContent.FadeOut();
+                await Task.Delay(400);
+                NavigationService.Navigate(FullScreen);
+            }
+        }
+
+        public async Task DoSimulation(SimulationContext context, int waittime)
+        {
+            FullScreen.Direction = context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN;
+            NavigationService.Navigate(FullScreen);
+            IsResizable = false;
+            FullScreen.FloorText.Text = context.startPos == 0 ? context.AvailableFloors[0] : context.AvailableFloors[context.AvailableFloors.Length - 1];
+
+
+
+            await Task.Delay(waittime * 1000 + 2000);
+            PlayUpDownSound(0);
+            await Task.Delay(2000);
+            FullScreen.UpdateInfoText(TranslatableInfoText.DoorClose);
+            PlayDoorAnnounce(1);
+            await Task.Delay(7000);
+            FullScreen.UpdateInfoText(TranslatableInfoText.Empty);
+            await SwitchDisplay(1);
+            WithContent.ArrowMotion = 2;
+            WithContent.NextFloor.Text = context.startPos == 0 ? context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0];
+
+            for (int i = 1; i < context.AvailableFloors.Length; i++)
+            {
+                await Task.Delay(3000);
+                WithContent.updateFloor(context.AvailableFloors[i]);
+            }
+            await Task.Delay(1000);
+            WithContent.ArrowMotion = 1;
+            PlayFloorArriveSoundAndPlayOpen(context.startPos == 0 ?
+                context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0]);
+            PlayFloorArriveSound(context.startPos == 0 ? context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0]);
+            await Task.Delay(1200);
+            WithContent.setInfoText(TranslatableInfoText.DoorOpen);
+            await Task.Delay(3000);
+            WithContent.ArrowMotion = 0;
+            await Task.Delay(1000);
+            WithContent.UpdateArrow(ElevatorDirection.DOWN);
+            await Task.Delay(400);
+            FullScreen.Direction = context.startPos == 0 ? ElevatorDirection.DOWN : ElevatorDirection.UP;
+            FullScreen.FloorText.Text = context.startPos == 0 ? context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0];
+            FullScreen.updateArrow(ElevatorDirection.DOWN);
+            await SwitchDisplay(0);
+            WithContent.setInfoText(TranslatableInfoText.Empty);
         }
     }
 }

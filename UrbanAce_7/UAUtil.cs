@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NAudio.Wave;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace UrbanAce_7
 {
     public class UAUtil
     {
+
         public static string Ordinal(int i)
         {
             if (i / 10 != 1)
@@ -26,6 +28,11 @@ namespace UrbanAce_7
         {
             IN,
             OUT
+        }
+
+        public static void PlayFloorArriveSound(string floorName)
+        {
+
         }
     }
 }
