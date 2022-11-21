@@ -39,13 +39,7 @@
                    FontFamily="Segoe UI" FontWeight="SemiBold" Text="" Margin="6"/>
 
         <Grid Grid.Row="2" Name="InfoGrid" Background="Black">
-            <Grid x:Name="BlueInfoAndWarn" Visibility="Collapsed">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="100"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-            </Grid>
-            
+            <Image x:Name="IntroOrWarn" Source="Resources/Warn1.png" Stretch="UniformToFill"/>
         </Grid>
 
         <Grid Background="Gray" Grid.Row="3">

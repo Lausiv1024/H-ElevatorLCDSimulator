@@ -1,5 +1,8 @@
 ﻿using Microsoft.Web.WebView2.Wpf;
+using NAudio.CoreAudioApi.Interfaces;
 using System;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,8 +24,6 @@ namespace UrbanAce_7
         readonly string FLOOR_FONT = "Segoe UI";
         readonly string INFO_US_FONT = "Segoe_UI";
         readonly string INFO_JP_FONT = "BIZ UDゴシック";
-
-        int c = 1;
         public static WithContent INSTANCE { get; private set; }
         public static bool isInstanceCreated => INSTANCE != null;
         public WebView2 webView;
@@ -36,27 +37,24 @@ namespace UrbanAce_7
         TranslatableInfoText curInfoText;
         DispatcherTimer infoUpdateTimer;
         DispatcherTimer ArrowTimer;
+        private const int ArrowSlow = 1800;
+        private const int ArrowFast = 900;
 
         public int ArrowMotion
         {
             get { return arMotion; }
             set
             {
-                if (arMotion < 0) return;
-
                 arMotion = value;
+                ArrowTimer.IsEnabled = value != 0;
                 if (value == 2)
                 {
-                    ArrowTimer.Start();
+                    ArrowTimer.Interval = TimeSpan.FromMilliseconds(ArrowFast);
                     DoArrowAnim();
                 }else if (value == 1)
                 {
-                    ArrowTimer.Interval = TimeSpan.FromMilliseconds(2000);
+                    ArrowTimer.Interval = TimeSpan.FromMilliseconds(ArrowSlow);
                     DoArrowAnim();
-                }
-                else
-                {
-                    ArrowTimer.Stop();
                 }
             }
         }
@@ -75,7 +73,6 @@ namespace UrbanAce_7
                 "--autoplay-policy=no-user-gesture-required");
             Loaded += async (s, e) => await PostInit();
             ArrowTimer = new DispatcherTimer();
-            ArrowTimer.Interval = TimeSpan.FromMilliseconds(900);
             ArrowTimer.Tick += (s, e) => DoArrowAnim();
         }
         private void Init()
@@ -89,19 +86,27 @@ namespace UrbanAce_7
         }
         private async Task PostInit()//PostInit is called on Loaded event
         {
-            drawArrow(false);
+            Clear__DEBUG_C();
+
+            drawArrow(direction == ElevatorDirection.DOWN);
             elementFadeIn(ArrowRenderer.Children[0]);
             elementFadeIn(FloorName);
             setInfoText(TranslatableInfoText.NextFloor);
-            if (webView == null) webView = new WebView2();
+            if (webView is null) 
+            {
+                webView = new WebView2();
+                InfoGrid.Children.Add(webView);
+            }
             webView.CoreWebView2InitializationCompleted += (s, a) =>
             {
                 if (!a.IsSuccess) return;
                 webView.IsEnabled = false;
             };
-            //await setWebView("https://example.com");
-            await setYoutubeEnbedContent("Cy82ox6K_AY");
-
+            IntroOrWarn.Visibility = Visibility.Collapsed;
+            await setWebView(UAUtil.ResourceDirectoryPath + "AL.mp4");
+            webView.CoreWebView2.IsMuted = true;
+            //await setYoutubeEnbedContent("Cy82ox6K_AY");
+            await Task.Delay(10);
             infoUpdateTimer = new DispatcherTimer();
             infoUpdateTimer.Interval = new TimeSpan(0, 0, 4);
             infoUpdateTimer.Tick += (s, e) =>
@@ -122,7 +127,7 @@ namespace UrbanAce_7
                 t.CenterY = ArrowImgSize / 2;
                 img.RenderTransform = t;
             }
-            ArrowRenderer.Children.Add(img);
+            Add__DEBUG_C(img);
         }
 
         private Image createArrowImg(double size, double rotation)
@@ -248,10 +253,10 @@ namespace UrbanAce_7
             var nextArrow = createArrowImg(ArrowImgSize, direction == ElevatorDirection.DOWN ? 180 : 0);
 
             Canvas.SetTop(nextArrow, NextArrowStartPos);
-            ArrowRenderer.Children.Add(nextArrow);
+            Add__DEBUG_C(nextArrow);
             MoveElementTop(prevArrow, 0, PrevArrowEndPos, mvTime, () =>
             {
-                ArrowRenderer.Children.Remove(prevArrow);
+                Remove__DEBUG_C(prevArrow);
                 isAnimating = false;
             });
             MoveElementTop(nextArrow, NextArrowStartPos, 0, mvTime);
@@ -284,14 +289,15 @@ namespace UrbanAce_7
 
         public void UpdateArrow(ElevatorDirection d)
         {
+            if (direction == d) return;
             direction = d;
             if (d == ElevatorDirection.NONE)
             {
                 if (ArrowRenderer.Children.Count == 0) return;
-                elementFadeOut(ArrowRenderer.Children[0],200, () => ArrowRenderer.Children.Clear());
+                elementFadeOut(ArrowRenderer.Children[0],200, () => Clear__DEBUG_C());
             } else
             {
-                ArrowRenderer.Children.Clear();
+                Clear__DEBUG_C();
                 drawArrow(d == ElevatorDirection.DOWN);
                 var img = ArrowRenderer.Children[0] as Image;
                 elementFadeIn(img);
@@ -300,7 +306,7 @@ namespace UrbanAce_7
 
         private void setFloorText(string str)
         {
-            bool disableMargin = str.Length > 2;
+            bool disableMargin = str.Length > 1;
             Thickness t = disableMargin ? new Thickness(-24, -20, 10, 0) : new Thickness(16, -20, 60, 0);
             FloorName.Text = str;
             FloorName.Margin = t;
@@ -326,9 +332,31 @@ namespace UrbanAce_7
                 elementFadeOut(ArrowRenderer.Children[0],100);
             elementFadeOut(FloorName,100);
             await Task.Delay(600);
-            ArrowRenderer.Children.Clear();
+            Reset();
+        }
+
+        public void Reset()
+        {
+            Clear__DEBUG_C();
+            ArrowRenderer.Children.Capacity = 1;
             infoUpdateTimer?.Stop();
             ArrowMotion = 0;
+
+        }
+
+        private void Add__DEBUG_C(UIElement e)
+        {
+            ArrowRenderer?.Children.Add(e);
+        }
+
+        private void Remove__DEBUG_C(UIElement e)
+        {
+            ArrowRenderer?.Children.Remove(e);
+        }
+
+        private void Clear__DEBUG_C()
+        {
+            ArrowRenderer?.Children.Clear();
         }
     }
 }

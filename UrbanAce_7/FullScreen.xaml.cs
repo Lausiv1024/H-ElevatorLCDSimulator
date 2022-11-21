@@ -53,11 +53,10 @@ namespace UrbanAce_7
         }
         private async void PostInit(object sender, RoutedEventArgs e)
         {
-            if (Direction == ElevatorDirection.DOWN) SwitchElements();
-            var a = CreateArrowImg(ArrowImgSize, Direction == ElevatorDirection.DOWN ? 180 : 0);
-            a.Opacity = 0;
-            ArrowRenderer.Children.Add(a);
-            await Task.Delay(100);
+            SwitchElements(Direction);
+            updateArrow(Direction);
+            ArrowRenderer.Children[0].Opacity = 0;
+            await Task.Delay(300);
             FadeElement(FloorText, 200, UAUtil.FadeType.IN);
             FadeElement(ArrowRenderer.Children[0], 200, UAUtil.FadeType.IN);
         }
@@ -77,10 +76,10 @@ namespace UrbanAce_7
             return img;
         }
 
-        private void SwitchElements()
+        private void SwitchElements(ElevatorDirection direction)
         {
-            Grid.SetRow(FloorText, 1);
-            Grid.SetRow(ArrowRenderer, 2);
+            Grid.SetRow(FloorText, direction == ElevatorDirection.UP ? 2 : 1);
+            Grid.SetRow(ArrowRenderer, direction == ElevatorDirection.UP ? 1 : 2);
         }
 
         private int infoFontSize => InfoLang == 0 ? 42 : 50;
@@ -114,8 +113,9 @@ namespace UrbanAce_7
         {
             Direction = direction;
             ArrowRenderer.Children.Clear();
-            CreateArrowImg(ArrowImgSize, Direction == ElevatorDirection.DOWN ? 180 : 0);
-            if (direction == ElevatorDirection.DOWN) SwitchElements();
+            var a = CreateArrowImg(ArrowImgSize, Direction == ElevatorDirection.DOWN ? 180 : 0);
+            ArrowRenderer.Children.Add(a);
+            SwitchElements(direction);
         }
 
         public void FadeOut()

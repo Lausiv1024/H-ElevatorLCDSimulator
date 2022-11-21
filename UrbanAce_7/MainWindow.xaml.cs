@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 
 namespace UrbanAce_7
@@ -49,8 +50,6 @@ namespace UrbanAce_7
                 }
             }
         }
-
-        private bool animationRunning = false;
 
         public MainWindow()
         {
@@ -114,25 +113,6 @@ namespace UrbanAce_7
                 var setting = new Setting();
                 NavigationService.Navigate(setting);
             }
-            //if (e.Key == Key.S && isCtrlPressed)
-            //{
-            //    if (animationRunning) return;
-            //    animationRunning = true;
-            //    IsResizable = false;
-            //    if (displayMode == 0) displayMode = 1;
-            //    else displayMode = displayMode == 1 ? 2 : 1;
-            //    if (displayMode == 2)
-            //    {
-            //        FullScreen.FadeOut();
-            //        await Task.Delay(600);
-            //        NavigationService.Navigate(WithContent);
-            //    } else if (displayMode == 1)
-            //    {
-            //        await WithContent.FadeOut();
-            //        NavigationService.Navigate(FullScreen);
-            //    }
-            //    animationRunning = false;
-            //}
             if (e.Key == Key.K)
             {
                 ElevatorDirection d = WithContent.INSTANCE.direction;
@@ -227,53 +207,113 @@ namespace UrbanAce_7
             } else
             {
                 await WithContent.FadeOut();
-                await Task.Delay(400);
+                await Task.Delay(200);
                 NavigationService.Navigate(FullScreen);
+                WithContent.IntroOrWarn.Visibility = Visibility.Collapsed;
+                if (WithContent.webView != null)
+                    WithContent.webView.Visibility = Visibility.Visible;
             }
         }
 
         public async Task DoSimulation(SimulationContext context, int waittime)
         {
-            FullScreen.Direction = context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN;
+            #region 初期化処理
+            bool startFromBottom = context.startPos == 0;
+            string start = startFromBottom ? context.AvailableFloors[0] : context.AvailableFloors[context.AvailableFloors.Length - 1];
+            string end = !startFromBottom ? context.AvailableFloors[0] : context.AvailableFloors[context.AvailableFloors.Length - 1];
+            WithContent.updateFloor(start);
+
             NavigationService.Navigate(FullScreen);
             IsResizable = false;
-            FullScreen.FloorText.Text = context.startPos == 0 ? context.AvailableFloors[0] : context.AvailableFloors[context.AvailableFloors.Length - 1];
+            #endregion
+            await Task.Delay(waittime * 1000);
+
+            do
+            {
+                await ToNextFloor(context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN, true, start);
+                await Simu1(context, context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN);
+                await ToNextFloor(context.startPos == 0 ? ElevatorDirection.DOWN : ElevatorDirection.UP, context.RoundTrip, end);
+                if (context.RoundTrip)
+                {
+                    await Simu1(context, context.startPos == 0 ? ElevatorDirection.DOWN : ElevatorDirection.UP);
+                    if (!context.Loop)
+                        await ToNextFloor(context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN, false, start);
+                }
+            } while (context.Loop);
+
+            BackToSetting();
+        }
 
 
 
-            await Task.Delay(waittime * 1000 + 2000);
-            PlayUpDownSound(0);
-            await Task.Delay(2000);
-            FullScreen.UpdateInfoText(TranslatableInfoText.DoorClose);
-            PlayDoorAnnounce(1);
-            await Task.Delay(7000);
-            FullScreen.UpdateInfoText(TranslatableInfoText.Empty);
+        private async Task ToNextFloor(ElevatorDirection nextDirection, bool toNextFloor, string arrivedFloor)
+        {
+            FullScreen.Direction = nextDirection;
+            FullScreen.FloorText.Text = arrivedFloor;
+            FullScreen.updateArrow(nextDirection);
+            WithContent.UpdateArrow(nextDirection);
+
+            await SwitchDisplay(0);
+            WithContent.setInfoText(TranslatableInfoText.Empty);
+            if (toNextFloor)
+            {
+                await Task.Delay(2500);
+                PlayUpDownSound(nextDirection == ElevatorDirection.UP ? 0 : 1);
+            }
+            await Task.Delay(5000);
+            if (toNextFloor)
+            {
+                FullScreen.UpdateInfoText(TranslatableInfoText.DoorClose);
+                PlayDoorAnnounce(1);
+                await Task.Delay(5200);
+                FullScreen.UpdateInfoText(TranslatableInfoText.Empty);
+            }
+        }
+
+        private async Task Simu1(SimulationContext context, ElevatorDirection direction)
+        {
+            bool startFromBottom = direction == ElevatorDirection.UP;
+            string end = !startFromBottom ? context.AvailableFloors[0] : context.AvailableFloors[context.AvailableFloors.Length - 1];
             await SwitchDisplay(1);
             WithContent.ArrowMotion = 2;
-            WithContent.NextFloor.Text = context.startPos == 0 ? context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0];
+            WithContent.NextFloor.Text = end;
 
-            for (int i = 1; i < context.AvailableFloors.Length; i++)
+            if (startFromBottom)
             {
-                await Task.Delay(3000);
-                WithContent.updateFloor(context.AvailableFloors[i]);
+                for (int i = 1; i < context.AvailableFloors.Length; i++)
+                {
+                    await Task.Delay(3000);
+                    WithContent.updateFloor(context.AvailableFloors[i]);
+                }
+            } else
+            {
+                for (int i = context.AvailableFloors.Length - 2; i >= 0; i--)
+                {
+                    await Task.Delay(3000);
+                    WithContent.updateFloor(context.AvailableFloors[i]);
+                }
             }
             await Task.Delay(1000);
             WithContent.ArrowMotion = 1;
-            PlayFloorArriveSoundAndPlayOpen(context.startPos == 0 ?
-                context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0]);
-            PlayFloorArriveSound(context.startPos == 0 ? context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0]);
+            PlayFloorArriveSoundAndPlayOpen(end);
             await Task.Delay(1200);
+            WithContent.IntroOrWarn.Source = new BitmapImage(UAUtil.RandomWarning);
+            WithContent.webView.Visibility = Visibility.Hidden;
+            WithContent.IntroOrWarn.Visibility = Visibility.Visible;
             WithContent.setInfoText(TranslatableInfoText.DoorOpen);
             await Task.Delay(3000);
             WithContent.ArrowMotion = 0;
             await Task.Delay(1000);
-            WithContent.UpdateArrow(ElevatorDirection.DOWN);
-            await Task.Delay(400);
-            FullScreen.Direction = context.startPos == 0 ? ElevatorDirection.DOWN : ElevatorDirection.UP;
-            FullScreen.FloorText.Text = context.startPos == 0 ? context.AvailableFloors[context.AvailableFloors.Length - 1] : context.AvailableFloors[0];
-            FullScreen.updateArrow(ElevatorDirection.DOWN);
-            await SwitchDisplay(0);
-            WithContent.setInfoText(TranslatableInfoText.Empty);
+            WithContent.UpdateArrow(startFromBottom ? ElevatorDirection.DOWN : ElevatorDirection.UP);
+            await Task.Delay(200);
+        }
+
+        private void BackToSetting()
+        {
+            WithContent.webView.Dispose();
+            WithContent.webView = null;
+            WithContent.Reset();
+            NavigationService.Navigate(Setting);
         }
     }
 }

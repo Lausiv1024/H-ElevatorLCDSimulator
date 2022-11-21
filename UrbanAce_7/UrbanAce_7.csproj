@@ -103,6 +103,7 @@
     <Compile Include="ElevatorAnimationInfo.cs" />
     <Compile Include="ElevatorDirection.cs" />
     <Compile Include="ElevatorScreen.cs" />
+    <Compile Include="Intro.cs" />
     <Compile Include="MainDesign.cs" />
     <Compile Include="NumericBox.cs" />
     <Compile Include="Setting.xaml.cs">
@@ -192,6 +193,33 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\EmbedMute.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\intro1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Intro2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Intro3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Intro4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Warn1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Warn2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Warn3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Warn4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Intro5.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Web.WebView2.1.0.1418.22\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.1418.22\build\Microsoft.Web.WebView2.targets')" />

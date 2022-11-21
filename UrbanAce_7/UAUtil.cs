@@ -1,6 +1,7 @@
 ﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,10 @@ namespace UrbanAce_7
 {
     public class UAUtil
     {
+        public static string ResourceDirectoryPath => $"{Directory.GetCurrentDirectory()}\\resources\\";
+
+        public static Random Rand = new Random();
+        public static Uri RandomWarning => new Uri($@"pack://application:,,,/Resources/Warn{Rand.Next(1,5)}.png");
 
         public static string Ordinal(int i)
         {
@@ -28,11 +33,6 @@ namespace UrbanAce_7
         {
             IN,
             OUT
-        }
-
-        public static void PlayFloorArriveSound(string floorName)
-        {
-
         }
     }
 }
