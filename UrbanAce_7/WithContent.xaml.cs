@@ -102,10 +102,8 @@ namespace UrbanAce_7
                 if (!a.IsSuccess) return;
                 webView.IsEnabled = false;
             };
-            IntroOrWarn.Visibility = Visibility.Collapsed;
-            await setWebView(UAUtil.ResourceDirectoryPath + "AL.mp4");
-            webView.CoreWebView2.IsMuted = true;
-            //await setYoutubeEnbedContent("Cy82ox6K_AY");
+            IntroOrWarn.Source = new BitmapImage(UAUtil.RandomIntro);
+            IntroOrWarn.Visibility = Visibility.Visible;
             await Task.Delay(10);
             infoUpdateTimer = new DispatcherTimer();
             infoUpdateTimer.Interval = new TimeSpan(0, 0, 4);
@@ -331,7 +329,7 @@ namespace UrbanAce_7
             if (ArrowRenderer.Children.Count != 0)
                 elementFadeOut(ArrowRenderer.Children[0],100);
             elementFadeOut(FloorName,100);
-            await Task.Delay(600);
+            await Task.Delay(400);
             Reset();
         }
 

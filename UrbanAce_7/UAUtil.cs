@@ -15,6 +15,8 @@ namespace UrbanAce_7
         public static Random Rand = new Random();
         public static Uri RandomWarning => new Uri($@"pack://application:,,,/Resources/Warn{Rand.Next(1,5)}.png");
 
+        public static Uri RandomIntro => new Uri($@"pack://application:,,,/Resources/Intro{Rand.Next(1, 6)}.png");
+
         public static string Ordinal(int i)
         {
             if (i / 10 != 1)
