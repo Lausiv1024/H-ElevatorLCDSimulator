@@ -36,5 +36,27 @@ namespace UrbanAce_7
             IN,
             OUT
         }
+
+        public static string GetUsDayOfWeek(DayOfWeek d)
+        {
+            switch (d)
+            {
+                case DayOfWeek.Sunday:
+                    return "SUN.";
+                case DayOfWeek.Monday:
+                    return "MON.";
+                case DayOfWeek.Tuesday:
+                    return "TUE.";
+                case DayOfWeek.Wednesday:
+                    return "WED.";
+                case DayOfWeek.Thursday:
+                    return "THU.";
+                case DayOfWeek.Friday:
+                    return "FRI.";
+                case DayOfWeek.Saturday:
+                    return "SAT.";
+            }
+            return string.Empty;
+        }
     }
 }

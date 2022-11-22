@@ -24,6 +24,8 @@ namespace UrbanAce_7
 
         public static FullScreen Instance { get; private set; }
         public static bool IsInstanceCreated => Instance != null;
+
+        public int ClockMode = 0;
         
         public FullScreen()
         {
@@ -123,6 +125,10 @@ namespace UrbanAce_7
             FadeElement(FloorText, 100, UAUtil.FadeType.OUT);
             if (ArrowRenderer.Children.Count != 0)
                 FadeElement(ArrowRenderer.Children[0], 100, UAUtil.FadeType.OUT);
+        }
+
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

@@ -74,6 +74,7 @@ namespace UrbanAce_7
             Loaded += async (s, e) => await PostInit();
             ArrowTimer = new DispatcherTimer();
             ArrowTimer.Tick += (s, e) => DoArrowAnim();
+
         }
         private void Init()
         {
@@ -113,6 +114,15 @@ namespace UrbanAce_7
                 setInfoText(curInfoText);
             };
             infoUpdateTimer.Start();
+            UpdateClock();
+
+        }
+
+        private void UpdateClock()
+        {
+            var now = DateTime.Now;
+            Time.Text = now.ToString("M/d     H:mm");
+
         }
 
         public void drawArrow(bool isDown)
@@ -260,6 +270,8 @@ namespace UrbanAce_7
             MoveElementTop(nextArrow, NextArrowStartPos, 0, mvTime);
         }
 
+
+
         private void MoveElementTop(UIElement element, double from, double to, double millSecDuration) =>
             MoveElementTop(element, from, to, millSecDuration, null);
         private void MoveElementTop(UIElement element, double from, double to, double millSecDuration, Action onCompleted)
@@ -355,6 +367,10 @@ namespace UrbanAce_7
         private void Clear__DEBUG_C()
         {
             ArrowRenderer?.Children.Clear();
+        }
+
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

@@ -107,7 +107,13 @@
                 </Grid>
             </TabItem>
             <TabItem Header="コンテンツ設定">
-                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.5*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    
+                </Grid>
             </TabItem>
         </TabControl>
         <Grid Grid.Row="1">

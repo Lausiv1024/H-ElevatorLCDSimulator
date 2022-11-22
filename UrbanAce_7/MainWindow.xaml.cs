@@ -5,9 +5,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 
 namespace UrbanAce_7
 {
@@ -36,6 +38,8 @@ namespace UrbanAce_7
         private WithContent WithContent { get; set; }
         private FullScreen FullScreen { get; set; }
         private Setting Setting { get; set; }
+        private DispatcherTimer ClockTimer;
+        private int ClockMode = 0;
 
         private bool IsResizable
         {
@@ -61,6 +65,9 @@ namespace UrbanAce_7
             NavigationService.Navigate(Setting);
             IsResizable = true;
             WaveOut = new WaveOut();
+            ClockTimer = new DispatcherTimer();
+            ClockTimer.Interval = new TimeSpan(0, 0, 4);
+            ClockTimer.Tick += (s, e) => updateClock();
         }
 
         private async void NavigationWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -88,7 +95,17 @@ namespace UrbanAce_7
                 Console.WriteLine($"Webview is Disposed : Msg : {de}");
             }
         }
+        private void updateClock()
+        {
+            var now = DateTime.Now;
+            FullScreen.Time.Text = now.ToString("M/d     H:mm");
+            ClockMode = 1 - ClockMode;
+            FullScreen.Day.Text = ClockMode == 0 ? now.ToString("(ddd)") : UAUtil.GetUsDayOfWeek(now.DayOfWeek);
 
+            WithContent.Time.Text = now.ToString("M/d     H:mm");
+            WithContent.Day.Text = ClockMode == 0 ? now.ToString("(ddd)") : UAUtil.GetUsDayOfWeek(now.DayOfWeek);
+
+        }
         private async void NavigationWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.V && isCtrlPressed)
@@ -218,6 +235,8 @@ namespace UrbanAce_7
         public async Task DoSimulation(SimulationContext context, int waittime)
         {
             #region 初期化処理
+            updateClock();
+            ClockTimer.Start();
             bool startFromBottom = context.startPos == 0;
             string start = startFromBottom ? context.AvailableFloors[0] : context.AvailableFloors[context.AvailableFloors.Length - 1];
             string end = !startFromBottom ? context.AvailableFloors[0] : context.AvailableFloors[context.AvailableFloors.Length - 1];
@@ -243,8 +262,6 @@ namespace UrbanAce_7
 
             BackToSetting();
         }
-
-
 
         private async Task ToNextFloor(ElevatorDirection nextDirection, bool toNextFloor, string arrivedFloor)
         {
@@ -314,6 +331,7 @@ namespace UrbanAce_7
             WithContent.webView = null;
             WithContent.Reset();
             NavigationService.Navigate(Setting);
+            ClockTimer.Stop();
         }
     }
 }

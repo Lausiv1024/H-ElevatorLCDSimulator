@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
       xmlns:local="clr-namespace:UrbanAce_7" MouseDown="Page_MouseDown"
-      mc:Ignorable="d"
+      mc:Ignorable="d" Unloaded="Page_Unloaded"
       d:DesignHeight="600" d:DesignWidth="500"
       Title="WithContent">
 
@@ -43,7 +43,10 @@
         </Grid>
 
         <Grid Background="Gray" Grid.Row="3">
-            
+            <TextBlock x:Name="Time" Text="8/11     19:19" VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Foreground="White" FontSize="32" FontFamily="BIZ UDPゴシック" FontWeight="Bold" Margin="0,0,5,0"/>
+            <TextBlock x:Name="Day" Text="(水)" Foreground="White" FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="325,0,0,11"
+                       FontFamily="BIZ UDPゴシック" FontWeight="Bold"/>
         </Grid>
     </Grid>
 </Page>
