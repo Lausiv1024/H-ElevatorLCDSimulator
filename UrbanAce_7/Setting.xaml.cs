@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,8 +10,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Text.RegularExpressions;
+using System.IO;
+using UrbanAce_7.ContentSettings;
+using System.Collections.Generic;
+using Tweetinvi;
+using Newtonsoft.Json;
+using System.Collections;
+using Microsoft.Win32;
+using UrbanAce_7.Profiling;
 
 namespace UrbanAce_7
 {
@@ -30,8 +36,10 @@ namespace UrbanAce_7
             {
                 e.Handled = (FloorS.Text.Length + e.Text.Length) > 3;
             };
-            addEnterAction(FloorS, () => AddSingleFloor());
+            addEnterAction(FloorS, () => AddSingleFloor(FloorS.Text, false));
             foreach (int s in UAUtil.Speeds) Speed.Items.Add(s);
+            InfoList.SelectionChanged += InfoList_Selected;
+            LoadAuthData();
         }
 
         private void FloorS_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -51,13 +59,13 @@ namespace UrbanAce_7
             };
         }
 
-        private void AddFloor_Click(object sender, RoutedEventArgs e) => AddSingleFloor();
-        private void AddSingleFloor()
+        private void AddFloor_Click(object sender, RoutedEventArgs e) => AddSingleFloor(FloorS.Text, false);
+        private void AddSingleFloor(string text, bool ignoreEmpty)
         {
-            if (FloorS.Text.Length == 0 || CheckAlreadyExists(FloorS.Text)) return;
+            if ((FloorS.Text.Length == 0 && !ignoreEmpty) || CheckAlreadyExists(text)) return;
             if (FloorList.SelectedIndex == -1)
-                FloorList.Items.Add(createListBoxItem(FloorS.Text));
-            else FloorList.Items.Insert(FloorList.SelectedIndex, createListBoxItem(FloorS.Text));
+                FloorList.Items.Add(createListBoxItem(text));
+            else FloorList.Items.Insert(FloorList.SelectedIndex, createListBoxItem(text));
             FloorS.Clear();
             SetTopAndBottomFloor();
         }
@@ -156,7 +164,7 @@ namespace UrbanAce_7
         {
             if (FloorList.Items.Count == 0) return;
             TopFloor.Text = $"最上階:{GetFloorName(FloorList.Items.Count - 1)}";
-            LowFloor.Text = $"最下層:{GetFloorName(0)}";
+            LowFloor.Text = $"最下階:{GetFloorName(0)}";
         }
 
         private void CreateMiddleFloorItem() => CreateMiddleFloorItem("");
@@ -224,9 +232,49 @@ namespace UrbanAce_7
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
             if (FloorList.Items.Count < 2) return;
+            var contentList = createListFromCollection();
+            StartButton.IsEnabled = false;
+            if (contentList.Where(s => s.requireAuth).Count() != 0)
+            {
+                try
+                {
+                    await UAUtil.VerifyTwitterAPI(new TwitterAPIAuthData
+                    {
+                        AccessToken = AccessToken.Text, AccessTokenSecret = TokenSecret.Text,
+                        ConsumerKey = ConsumerKey.Text,ConsumerSecret= ConsumerSecret.Text,
+                    });
+                } catch
+                {
+                    StartButton.IsEnabled = true;
+                    MessageBox.Show("Twitter APIの認証に失敗しました。");
+                    return;
+                }
+
+                if (contentList.Where(s => s is RandomTL).Count() > 0)
+                {
+                    await UAUtil.GetTimeLine(new TwitterAPIAuthData
+                    {
+                        AccessToken = AccessToken.Text,
+                        AccessTokenSecret = TokenSecret.Text,
+                        ConsumerKey = ConsumerKey.Text,
+                        ConsumerSecret = ConsumerSecret.Text,
+                    });
+                }
+                foreach (var s in contentList.Where(s => s is UserTweet))
+                {
+                    var us = s as UserTweet;
+                    await UAUtil.GetUserTweets(new TwitterAPIAuthData
+                    {
+                        AccessToken = AccessToken.Text,
+                        AccessTokenSecret = TokenSecret.Text,
+                        ConsumerKey = ConsumerKey.Text,
+                        ConsumerSecret = ConsumerSecret.Text,
+                    }, us.UsrName.Text);
+                }
+            }
             var context = new SimulationContext { AvailableFloors = ConvertFloorListToArray(), 
                 RoundTrip =(bool) RoundTrip.IsChecked,Loop = RoundTrip.IsChecked == true ?(bool) Loop.IsChecked : false, startPos = startPos};
-            await MainWindow.Instance.DoSimulation(context, StartDelayTime.Value);
+            await MainWindow.Instance.DoSimulation(context, StartDelayTime.Value, createListFromCollection());
         }
 
         private void StartPos_Click(object sender, RoutedEventArgs e)
@@ -234,6 +282,166 @@ namespace UrbanAce_7
             startPos = 1 - startPos;
             var a = startPos == 1 ? '下' : '上';
             StartPos.Content = $"開始位置:{a}";
+        }
+
+        private void AddInfo_Click(object sender, RoutedEventArgs e) => AddInfo.ContextMenu.IsOpen = true;
+
+        private void CustomNews_Click(object sender, RoutedEventArgs e)=> addContentData(new CustomNews());
+
+        private void addContentData(UABaseContent c)
+        {
+            DeploySettingUI(c);
+            InfoList.Items.Add(c);
+        }
+
+        private void DeploySettingUI(UABaseContent content)
+        {
+            SettingPanel.Children.Clear();
+            content.DeploySettingUI(SettingPanel);
+        }
+
+        private void InfoList_Selected(object sender, RoutedEventArgs e)
+        {
+            var i = InfoList.SelectedItem as UABaseContent;
+            if (i == null)
+            {
+                SettingPanel.Children.Clear();
+                return;
+            }
+            DeploySettingUI(i);
+            
+        }
+
+        private void Media_Click(object sender, RoutedEventArgs e) => addContentData(new Media());
+
+        private void YEmbedContent_Click(object sender, RoutedEventArgs e) => addContentData(new YoutubeEmbed());
+
+        private void RandomTL_Click(object sender, RoutedEventArgs e) => addContentData(new RandomTL());
+
+        private void RandomFromUser_Click(object sender, RoutedEventArgs e) => addContentData(new UserTweet());
+
+
+        private void DeleteContent_Click(object sender, RoutedEventArgs e)
+        {
+            int i = InfoList.SelectedIndex;
+            if (i == -1) return;
+            InfoList.Items.RemoveAt(i);
+        }
+
+        private List<UABaseContent> createListFromCollection()
+        {
+            var ll = InfoList.Items.Cast<UABaseContent>().ToList();
+
+            return ll;
+        }
+
+        private async void Verify_Click(object sender, RoutedEventArgs e)
+        {
+            Verify.IsEnabled = false;
+            try
+            {
+                var auth = new TwitterAPIAuthData
+                {
+                    AccessToken = AccessToken.Text,
+                    AccessTokenSecret = TokenSecret.Text,
+                    ConsumerKey = ConsumerKey.Text,
+                    ConsumerSecret = ConsumerSecret.Text,
+                };
+                await UAUtil.VerifyTwitterAPI(auth);
+                SaveAuthData();
+                UAUtil.AuthData = auth;
+                MessageBox.Show("正常に検証できました", "検証完了",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            } catch
+            {
+                MessageBox.Show("検証に失敗しました。", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            Verify.IsEnabled = true;
+        }
+
+        string AuthDataPath => Path.Combine(UAUtil.BaseDir, "AuthData.json");
+
+        public void SaveAuthData()
+        {
+            string json = JsonConvert.SerializeObject(new TwitterAPIAuthData
+            {
+                ConsumerKey = ConsumerKey.Text,ConsumerSecret= ConsumerSecret.Text,
+                AccessToken= AccessToken.Text,AccessTokenSecret= TokenSecret.Text,
+            });
+            Console.WriteLine(json);
+            
+            using (var sw = new StreamWriter(AuthDataPath))
+            {
+                sw.Write(json);
+            }
+        }
+
+        private void LoadAuthData()
+        {
+            if (!File.Exists(AuthDataPath)) return;
+            using (var sr = new StreamReader(AuthDataPath))
+            {
+                var authData = JsonConvert.DeserializeObject<TwitterAPIAuthData>(sr.ReadToEnd());
+                UAUtil.AuthData = authData;
+                ConsumerKey.Text = authData.ConsumerKey;
+                ConsumerSecret.Text = authData.ConsumerSecret;
+                AccessToken.Text = authData.AccessToken;
+                TokenSecret.Text = authData.AccessTokenSecret;
+            }
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            StartButton.IsEnabled = true;
+        }
+
+        private void ImportSettingFromFile(string path)
+        {
+            FloorList.Items.Clear();
+            using (var sr = new StreamReader(path))
+            {
+                var data = JsonConvert.DeserializeObject<FloorSetting>(sr.ReadToEnd());
+                
+                foreach (string item in data.Floors)
+                {
+                    AddSingleFloor(item, true);
+                }
+                RoundTrip.IsChecked = data.RoundTrip;
+                Loop.IsChecked = data.Loop;
+            }
+        }
+
+        private readonly string SettingFileFilter = "Json Setting File : (*.json) | *.json";
+
+        private void Import_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog= new OpenFileDialog();
+            dialog.Title = "インポート";
+            dialog.Filter = SettingFileFilter;
+            if (dialog.ShowDialog() == true)
+                ImportSettingFromFile(dialog.FileName);
+        }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new SaveFileDialog();
+            dialog.Title = "エクスポート";
+            dialog.Filter = SettingFileFilter;
+            if (dialog.ShowDialog() == true)
+            {
+                var floorName = FloorList.Items.Cast<ListBoxItem>().Select(s => s.Content as string);
+                var data = new FloorSetting
+                {
+                    RoundTrip =(bool) RoundTrip.IsChecked, Loop=(bool) Loop.IsChecked,
+                    Floors = floorName.ToArray()
+                };
+                string json = JsonConvert.SerializeObject(data);
+                using (var sw = new StreamWriter(dialog.FileName))
+                {
+                    sw.Write(json);
+                }
+            }
         }
     }
 }

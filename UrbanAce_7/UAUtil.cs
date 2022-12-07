@@ -3,19 +3,39 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using Tweetinvi;
+using Tweetinvi.Models;
 
 namespace UrbanAce_7
 {
     public class UAUtil
     {
-        public static string ResourceDirectoryPath => $"{Directory.GetCurrentDirectory()}\\resources\\";
+        public static string ResourceDirectoryPath => $"{BaseDir}\\resources\\";
 
         public static Random Rand = new Random();
         public static Uri RandomWarning => new Uri($@"pack://application:,,,/Resources/Warn{Rand.Next(1,5)}.png");
 
         public static Uri RandomIntro => new Uri($@"pack://application:,,,/Resources/Intro{Rand.Next(1, 6)}.png");
+
+        public static string BaseDir => Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+
+        public static TwitterAPIAuthData AuthData { get; set; }
+
+        public static TwitterClient GetClient(TwitterAPIAuthData authData) => new TwitterClient(authData.ConsumerKey, authData.ConsumerSecret,
+            authData.AccessToken, authData.AccessTokenSecret);
+
+        public static TwitterClient GetClient() => GetClient(AuthData);
+
+        public static bool TwitterVerified = false;
+
+        public static ITweet[] TLTweets = new ITweet[0];
+        public static List<ITweet> UserTweets = new List<ITweet>();
+
+        public static int LoopCount = 0;
 
         public static string Ordinal(int i)
         {
@@ -57,6 +77,32 @@ namespace UrbanAce_7
                     return "SAT.";
             }
             return string.Empty;
+        }
+
+        public static async Task VerifyTwitterAPI(TwitterAPIAuthData auth)
+        {
+            var client = new TwitterClient(auth.ConsumerKey, auth.ConsumerSecret,
+                auth.AccessToken, auth.AccessTokenSecret);
+            await client.Users.GetAuthenticatedUserAsync();
+            
+        }
+
+        public static async Task GetUserTweets(TwitterAPIAuthData auth, string userId)
+        {
+            var client = new TwitterClient(auth.ConsumerKey, auth.ConsumerSecret,
+                auth.AccessToken, auth.AccessTokenSecret);
+            var tl = await client.Timelines.GetUserTimelineAsync(userId);
+            UserTweets.AddRange(tl.Where(s => !s.IsRetweet).Where(s => s.Media.Count == 0).Where(t => !t.FullText.Contains("@")).Where(t => t.FullText.Count(r => r == '\n') < 5)
+                .Where(s => !s.FullText.Contains("https://")).Where(s => !s.FullText.Contains("http://")));
+        }
+
+        public static async Task GetTimeLine(TwitterAPIAuthData auth)
+        {
+            var client = new TwitterClient(auth.ConsumerKey, auth.ConsumerSecret,
+                auth.AccessToken, auth.AccessTokenSecret);
+            var tl = await client.Timelines.GetHomeTimelineAsync();
+            TLTweets = tl.Where(s => !s.IsRetweet).Where(s => s.Media.Count == 0).Where(s => !s.FullText.Contains("https://")).Where(t => !t.FullText.Contains("@")).Where(t => t.FullText.Count(r => r == '\n') < 5)
+                .ToArray();
         }
     }
 }

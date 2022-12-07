@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:UrbanAce_7"
-      mc:Ignorable="d" 
+      mc:Ignorable="d"  Loaded="Page_Loaded"
       d:DesignHeight="600" d:DesignWidth="500"
       Title="Setting">
     <Grid>
@@ -25,7 +25,7 @@
                                 <RowDefinition Height="40"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="30"/>
-                                <RowDefinition Height="0.7*"/>
+                                <RowDefinition Height="0.8*"/>
                             </Grid.RowDefinitions>
                             <TextBlock Text="サービス可能階の設定" Margin="8" FontSize="16"/>
                             <ListBox x:Name="FloorList" Grid.Row="1" Margin="8,0" d:ItemsSource="{d:SampleData ItemCount=5}"/>
@@ -69,6 +69,14 @@
                                          CommandManager.PreviewExecuted="FloorS_PreviewExecuted"/>
                                     <Button x:Name="AddFloor" Grid.Column="1" Margin="8,6" Content="追加" Click="AddFloor_Click"/>
                                 </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button x:Name="Import" Content="インポート" Margin="5" Click="Import_Click"/>
+                                    <Button x:Name="Export" Grid.Column="1" Content="エクスポート" Margin="5" Click="Export_Click"/>
+                                </Grid>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -88,7 +96,7 @@
                             <TextBlock Grid.Row="2" Text="途中階" Margin="8"/>
                             <ListBox x:Name="MiddleFloor" Grid.Row="3" Margin="8,0" d:ItemsSource="{d:SampleData ItemCount=5}"/>
                             <Button x:Name="AddMiddleFloor" Grid.Row="4" Content="+" FontSize="16" Margin="8,0" Click="AddMiddleFloor_Click"/>
-                            <TextBlock Name="LowFloor" Grid.Row="5" Text="最下:" Margin="8" FontSize="16"/>
+                            <TextBlock Name="LowFloor" Grid.Row="5" Text="最下階:" Margin="8" FontSize="16"/>
                             <StackPanel Grid.Row="6" Margin="8">
                                 <CheckBox x:Name="RoundTrip" Content="往復運転" Margin="0,4"/>
                                 <CheckBox x:Name="Loop" Content="無限ループ" IsEnabled="{Binding ElementName=RoundTrip, Path=IsChecked}" Margin="0,4"/>
@@ -112,8 +120,47 @@
                         <ColumnDefinition Width="0.5*"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <ListBox x:Name="InfoList" Margin="8">
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Name="DeleteContent" Header="削除" Click="DeleteContent_Click"/>
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                        </ListBox>
+                        <Button x:Name="AddInfo" Grid.Row="1" Margin="8" Content="+" FontSize="16" Click="AddInfo_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Name="CustomNews" Header="ユーザー定義ニュース" Click="CustomNews_Click"/>
+                                    <MenuItem Name="Media" Header="メディア" Click="Media_Click"/>
+                                    <MenuItem Name="YEmbedContent" Header="Youtube埋め込み" Click="YEmbedContent_Click"/>
+                                    <MenuItem Name="RandomTL" Header="TLからランダムでTweetをランダム取得"
+                                              Click="RandomTL_Click"/>
+                                    <MenuItem x:Name="RandomFromUser" Header="設定した垢のツイートをランダム取得"
+                                              Click="RandomFromUser_Click"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+                    </Grid>
+                    <StackPanel x:Name="SettingPanel" Grid.Column="1" Margin="8">
+                        
+                    </StackPanel>
                 </Grid>
+            </TabItem>
+            <TabItem Header="TwitterAPI認証設定">
+                <StackPanel Margin="8">
+                    <TextBlock Text="注意：事前にTwitterAPI v1の申請を行って、各種認証情報を取得してください" Foreground="Red"/>
+                    <local:TextBoxWithHeader x:Name="ConsumerKey" Header="ConsumerKey"/>
+                    <local:TextBoxWithHeader x:Name="ConsumerSecret" Header="ConsumerSecret"/>
+                    <local:TextBoxWithHeader x:Name="AccessToken" Header="AccessToken"/>
+                    <local:TextBoxWithHeader x:Name="TokenSecret" Header="AccessTokenSecret"/>
+                    <Button x:Name="Verify" Content="検証" Width="120" Click="Verify_Click"/>
+                </StackPanel>
             </TabItem>
         </TabControl>
         <Grid Grid.Row="1">

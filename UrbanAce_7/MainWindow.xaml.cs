@@ -1,8 +1,11 @@
 ﻿using Microsoft.Web.WebView2.Wpf;
 using NAudio.Wave;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using UrbanAce_7.ContentSettings;
 
 namespace UrbanAce_7
 {
@@ -170,7 +174,7 @@ namespace UrbanAce_7
             }
         }
 
-        private string AudioResourceDirectoryPath => $"{Directory.GetCurrentDirectory()}\\resources\\";
+        private string AudioResourceDirectoryPath => Path.Combine(UAUtil.BaseDir, $"resources{Path.DirectorySeparatorChar}");
 
         private bool PlayFloorArriveSound(string floorName)
         {
@@ -232,7 +236,7 @@ namespace UrbanAce_7
             }
         }
 
-        public async Task DoSimulation(SimulationContext context, int waittime)
+        public async Task DoSimulation(SimulationContext context, int waittime, List<UABaseContent> contents)
         {
             #region 初期化処理
             updateClock();
@@ -244,12 +248,15 @@ namespace UrbanAce_7
 
             NavigationService.Navigate(FullScreen);
             IsResizable = false;
-            #endregion
             await Task.Delay(waittime * 1000);
-
+            WithContent.Contents = contents;
+            bool hasTwitterFunc = UABaseContent.hasContentRequireTwitterAPI(contents);
+            int count = 0;
+            #endregion
             do
             {
-                await ToNextFloor(context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN, true, start);
+                await ToNextFloor(context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN, true, start,
+                    hasTwitterFunc && count > 0 ? contents.Where(c => c.requireAuth).ToList() : null);
                 await Simu1(context, context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN);
                 await ToNextFloor(context.startPos == 0 ? ElevatorDirection.DOWN : ElevatorDirection.UP, context.RoundTrip, end);
                 if (context.RoundTrip)
@@ -258,12 +265,17 @@ namespace UrbanAce_7
                     if (!context.Loop)
                         await ToNextFloor(context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN, false, start);
                 }
+                count++;
             } while (context.Loop);
 
             BackToSetting();
         }
 
-        private async Task ToNextFloor(ElevatorDirection nextDirection, bool toNextFloor, string arrivedFloor)
+        private async Task ToNextFloor(ElevatorDirection nextDirection, bool toNextFloor, string arrivedFloor) =>
+            await ToNextFloor(nextDirection, toNextFloor, arrivedFloor, null);
+
+        private async Task ToNextFloor(ElevatorDirection nextDirection, bool toNextFloor,
+            string arrivedFloor, List<UABaseContent> twitterContents)
         {
             FullScreen.Direction = nextDirection;
             FullScreen.FloorText.Text = arrivedFloor;
@@ -277,7 +289,35 @@ namespace UrbanAce_7
                 await Task.Delay(2500);
                 PlayUpDownSound(nextDirection == ElevatorDirection.UP ? 0 : 1);
             }
-            await Task.Delay(5000);
+            if (twitterContents != null && twitterContents.Count != 0)
+            {
+                if (twitterContents.Where(c => c is RandomTL).Count() > 0)
+                {
+                    Console.WriteLine("Getting Home Timeline");
+                    await UAUtil.GetTimeLine(UAUtil.AuthData);
+                }
+                UAUtil.UserTweets.Clear();
+                var users = twitterContents.Where(c => c is UserTweet).ToList();
+                int count = users.Count;
+                users.ForEach(async c =>
+                {
+                    var u = c as UserTweet;
+                    Console.WriteLine($"Getting {u.UserName}'s Tweet.");
+                    await UAUtil.GetUserTweets(UAUtil.AuthData, u.UserName);
+                    await Task.Delay(500);
+                    count--;
+                });
+                await Task.Run(() =>
+                {
+                    while (count > 0)
+                    {
+                        Thread.Sleep(500);
+                    }
+                });
+            } else
+            {
+                await Task.Delay(5000);
+            }
             if (toNextFloor)
             {
                 FullScreen.UpdateInfoText(TranslatableInfoText.DoorClose);
@@ -314,8 +354,7 @@ namespace UrbanAce_7
             WithContent.ArrowMotion = 1;
             PlayFloorArriveSoundAndPlayOpen(end);
             await Task.Delay(1200);
-            WithContent.IntroOrWarn.Source = new BitmapImage(UAUtil.RandomWarning);
-            WithContent.webView.Visibility = Visibility.Hidden;
+            WithContent.onArrive();
             WithContent.IntroOrWarn.Visibility = Visibility.Visible;
             WithContent.setInfoText(TranslatableInfoText.DoorOpen);
             await Task.Delay(3000);
@@ -327,7 +366,8 @@ namespace UrbanAce_7
 
         private void BackToSetting()
         {
-            WithContent.webView.Dispose();
+            if (!(WithContent.webView is null))
+                WithContent.webView.Dispose();
             WithContent.webView = null;
             WithContent.Reset();
             NavigationService.Navigate(Setting);

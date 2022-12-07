@@ -20,10 +20,10 @@
                    FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="220"/>
         <TextBlock Name="InfoText" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                    FontFamily="BIZ UDゴシック" Text="" Margin="20" FontSize="42" FontWeight="Bold"/>
-        <Grid Background="Gray" Grid.Row="4">
+        <Grid Background="#494949" Grid.Row="4">
             <TextBlock x:Name="Time" Text="8/11     19:19" VerticalAlignment="Top" HorizontalAlignment="Right"
                        Foreground="White" FontSize="32" FontFamily="BIZ UDPゴシック" FontWeight="Bold" Margin="0,8,5,0"/>
-            <TextBlock x:Name="Day" Text="(水)" Foreground="White" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="325,17,0,8"
+            <TextBlock x:Name="Day" Text="(水)" Foreground="White" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="322,17,0,8"
                        FontFamily="BIZ UDPゴシック" FontWeight="Bold"/>
         </Grid>
     </Grid>

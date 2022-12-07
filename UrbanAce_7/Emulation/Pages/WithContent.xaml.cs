@@ -1,6 +1,8 @@
 ﻿using Microsoft.Web.WebView2.Wpf;
 using NAudio.CoreAudioApi.Interfaces;
 using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -11,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using UrbanAce_7.ContentSettings;
 
 namespace UrbanAce_7
 {
@@ -39,6 +42,11 @@ namespace UrbanAce_7
         DispatcherTimer ArrowTimer;
         private const int ArrowSlow = 1800;
         private const int ArrowFast = 900;
+
+        public List<UABaseContent> Contents = new List<UABaseContent>();
+        private DispatcherTimer ContentUpdateTimer = new DispatcherTimer();
+        int prevContentIndex = -1;
+        const int DefaultContentChangeTime = 8;
 
         public int ArrowMotion
         {
@@ -74,7 +82,6 @@ namespace UrbanAce_7
             Loaded += async (s, e) => await PostInit();
             ArrowTimer = new DispatcherTimer();
             ArrowTimer.Tick += (s, e) => DoArrowAnim();
-
         }
         private void Init()
         {
@@ -115,14 +122,100 @@ namespace UrbanAce_7
             };
             infoUpdateTimer.Start();
             UpdateClock();
+            ContentUpdateTimer.Stop();
+            ContentUpdateTimer.Interval = TimeSpan.FromSeconds(DefaultContentChangeTime);
+            ContentUpdateTimer.Tick += async (s, e) =>
+            {
+                await UpdateContent();
+            };
+            ContentUpdateTimer.Start();
+        }
 
+        private async Task UpdateContent()
+        {
+            int i;
+            i = UAUtil.Rand.Next(0, Contents.Count + 1);
+
+
+            if (i == Contents.Count || Contents.Count == 0)
+            {
+                News.Visibility = Visibility.Hidden;
+                IntroOrWarn.Source = new BitmapImage(UAUtil.RandomIntro);
+                IntroOrWarn.Visibility = Visibility.Visible;
+                return;
+            }
+            
+            HideAllCustomContents();
+            var info = Contents[i];
+            //if (!(info is YoutubeEmbed)) ContentUpdateTimer.Interval = TimeSpan.FromSeconds(DefaultContentChangeTime);
+            
+            if (info is CustomNews)
+            {
+                var cNews = (CustomNews)info;
+                NewsText.Text = cNews.newsText.Text;
+                ProvidedBy.Text = $"{cNews.providedBy.Text} 提供";
+                News.Visibility = Visibility.Visible;
+            } else if (info is Media)
+            {
+                var media = (Media)info;
+                if (webView == null) 
+                { 
+                    webView = new WebView2();
+                    InfoGrid.Children.Add(webView);
+                } else
+                {
+                    webView.Visibility = Visibility.Visible;
+                }
+                await setWebView(media.Path.Text);
+            } else if (info is YoutubeEmbed)
+            {
+                var yEmbed = (YoutubeEmbed)info;
+                //ContentUpdateTimer.Interval = TimeSpan.FromSeconds(yEmbed.viewTime.Value);
+                if (webView == null) 
+                {
+                    webView = new WebView2();
+                    InfoGrid.Children.Add(webView);
+                } else
+                {
+                    webView.Visibility = Visibility.Visible;
+                }
+
+                await setYoutubeEnbedContent(yEmbed.MovID.Text);
+            }else if (info is RandomTL)
+            {
+                if (UAUtil.TLTweets.Length == 0) return;
+                var tweet = UAUtil.TLTweets[UAUtil.Rand.Next(0, UAUtil.TLTweets.Length)];
+                TweetTitle.Text = $"{tweet.CreatedBy.Name}さんのツイート";
+                TweetText.Text = tweet.FullText;
+                Tweet.Visibility = Visibility.Visible;
+            }else if (info is UserTweet)
+            {
+                if (UAUtil.UserTweets.Count == 0) return;
+                var tweet = UAUtil.UserTweets[UAUtil.Rand.Next(0, UAUtil.UserTweets.Count)];
+                TweetTitle.Text = $"{tweet.CreatedBy.Name}さんのツイート";
+                TweetText.Text = tweet.FullText;
+                Tweet.Visibility = Visibility.Visible;
+            }
         }
 
         private void UpdateClock()
         {
             var now = DateTime.Now;
             Time.Text = now.ToString("M/d     H:mm");
+        }
 
+        public void onArrive()
+        {
+            ContentUpdateTimer.Stop();
+            IntroOrWarn.Source = new BitmapImage(UAUtil.RandomWarning);
+            HideAllCustomContents();
+        }
+
+        private void HideAllCustomContents()
+        {
+            if (!(webView is null)) webView.Visibility = Visibility.Hidden;
+            News.Visibility = Visibility.Hidden;
+            Tweet.Visibility= Visibility.Hidden;
         }
 
         public void drawArrow(bool isDown)
@@ -193,7 +286,6 @@ namespace UrbanAce_7
             storyBoard.Children.Add(da);
 
             storyBoard.Begin();
-            
         }
 
         private void elementFadeOut(UIElement element, int millSec) => elementFadeOut(element, millSec, null);
@@ -223,6 +315,16 @@ namespace UrbanAce_7
 
         private void Page_MouseDown(object sender, MouseButtonEventArgs e)
         {
+        }
+
+
+        private void DisposeWebview()
+        {
+            if (webView != null)
+            {
+                webView.Dispose();
+                webView = null;
+            }
         }
 
         public void updateFloor(string fl)
@@ -326,6 +428,7 @@ namespace UrbanAce_7
         {
             if (this.webView.CoreWebView2 is null)
                 await this.webView.EnsureCoreWebView2Async();
+            webView.CoreWebView2.IsMuted = true;
             this.webView.CoreWebView2.Navigate(url);
         }
         public async Task setYoutubeEnbedContent(string MovID)
@@ -371,6 +474,7 @@ namespace UrbanAce_7
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
+            DisposeWebview();
         }
     }
 }
