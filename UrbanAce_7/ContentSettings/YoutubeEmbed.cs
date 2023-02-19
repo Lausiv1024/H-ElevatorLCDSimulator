@@ -13,8 +13,8 @@ namespace UrbanAce_7.ContentSettings
     {
         [JsonIgnore]
         public TextBoxWithHeader MovID;
-        [JsonIgnore]
-        public NumericBox viewTime;
+        //[JsonIgnore]
+        //public NumericBox viewTime;
 
         public string MovieID { get { return MovID.Text; } set { MovID.Text = value; } }
 
@@ -22,16 +22,16 @@ namespace UrbanAce_7.ContentSettings
         {
             MovID= new TextBoxWithHeader();
             MovID.Header = "動画ID";
-            viewTime = new NumericBox();
+            //viewTime = new NumericBox();
         }
 
         public override void DeploySettingUI(StackPanel parent)
         {
             parent.Children.Add(MovID);
-            var b  = new TextBlock();
-            b.Text = "持続時間(秒  0の場合デフォルト値)";
-            parent.Children.Add(b);
-            parent.Children.Add(viewTime);
+            //var b  = new TextBlock();
+            //b.Text = "持続時間(秒  0の場合デフォルト値)";
+            //parent.Children.Add(b);
+            //parent.Children.Add(viewTime);
         }
     }
 }

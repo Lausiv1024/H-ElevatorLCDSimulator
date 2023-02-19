@@ -37,7 +37,7 @@ namespace UrbanAce_7
                 e.Handled = (FloorS.Text.Length + e.Text.Length) > 3;
             };
             addEnterAction(FloorS, () => AddSingleFloor(FloorS.Text, false));
-            foreach (int s in UAUtil.Speeds) Speed.Items.Add(s);
+            //foreach (int s in UAUtil.Speeds) Speed.Items.Add(s);
             InfoList.SelectionChanged += InfoList_Selected;
             LoadAuthData();
         }
@@ -163,8 +163,8 @@ namespace UrbanAce_7
         private void SetTopAndBottomFloor()
         {
             if (FloorList.Items.Count == 0) return;
-            TopFloor.Text = $"最上階:{GetFloorName(FloorList.Items.Count - 1)}";
-            LowFloor.Text = $"最下階:{GetFloorName(0)}";
+            //TopFloor.Text = $"最上階:{GetFloorName(FloorList.Items.Count - 1)}";
+            //LowFloor.Text = $"最下階:{GetFloorName(0)}";
         }
 
         private void CreateMiddleFloorItem() => CreateMiddleFloorItem("");
@@ -203,14 +203,14 @@ namespace UrbanAce_7
             delete.Name = "Delete";
             delete.Margin = new Thickness(8);
             delete.Content = "削除";
-            delete.Click += (s, e) => MiddleFloor.Items.Remove(parent);
+            //delete.Click += (s, e) => MiddleFloor.Items.Remove(parent);
             Grid.SetColumn(FloorBox, 0);
             parent.Children.Add(FloorBox);
             Grid.SetColumn(UpDownSelecter, 1);
             parent.Children.Add(UpDownSelecter);
             Grid.SetColumn(delete, 2);
             parent.Children.Add(delete);
-            MiddleFloor.Items.Add(parent);
+            //MiddleFloor.Items.Add(parent);
         }
 
         private void AddMiddleFloor_Click(object sender, RoutedEventArgs e)

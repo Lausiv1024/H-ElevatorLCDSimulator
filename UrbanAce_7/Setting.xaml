@@ -91,24 +91,24 @@
                                 <RowDefinition Height="40"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <TextBlock Text="停止する階の設定" Margin="8" FontSize="16"/>
+                            <!--<TextBlock Text="停止する階の設定" Margin="8" FontSize="16"/>
                             <TextBlock Name="TopFloor" Grid.Row="1" Text="最上階:" FontSize="16" Margin="8"/>
                             <TextBlock Grid.Row="2" Text="途中階" Margin="8"/>
                             <ListBox x:Name="MiddleFloor" Grid.Row="3" Margin="8,0" d:ItemsSource="{d:SampleData ItemCount=5}"/>
                             <Button x:Name="AddMiddleFloor" Grid.Row="4" Content="+" FontSize="16" Margin="8,0" Click="AddMiddleFloor_Click"/>
-                            <TextBlock Name="LowFloor" Grid.Row="5" Text="最下階:" Margin="8" FontSize="16"/>
+                            <TextBlock Name="LowFloor" Grid.Row="5" Text="最下階:" Margin="8" FontSize="16"/>-->
                             <StackPanel Grid.Row="6" Margin="8">
                                 <CheckBox x:Name="RoundTrip" Content="往復運転" Margin="0,4"/>
                                 <CheckBox x:Name="Loop" Content="無限ループ" IsEnabled="{Binding ElementName=RoundTrip, Path=IsChecked}" Margin="0,4"/>
                                 <Button x:Name="StartPos" Content="開始位置:上" Margin="0,4" Click="StartPos_Click"/>
-                                <Grid>
+                                <!--<Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="60"/>
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="運行速度:"/>
                                     <ComboBox x:Name="Speed" Grid.Column="1"/>
-                                </Grid>
+                                </Grid>-->
                             </StackPanel>
                         </Grid>
                     </Border>

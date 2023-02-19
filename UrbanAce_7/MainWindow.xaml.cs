@@ -75,6 +75,9 @@ namespace UrbanAce_7
             ClockTimer = new DispatcherTimer();
             ClockTimer.Interval = new TimeSpan(0, 0, 4);
             ClockTimer.Tick += (s, e) => updateClock();
+
+            if (!File.Exists(UAUtil.ResourceDirectoryPath)) 
+                Directory.CreateDirectory(UAUtil.ResourceDirectoryPath);
         }
 
         private async void NavigationWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

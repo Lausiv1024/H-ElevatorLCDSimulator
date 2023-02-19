@@ -7,12 +7,12 @@ using System.Windows;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("UrbanAce_7")]
+[assembly: AssemblyTitle("H-ElevatorLCDSimulator")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Lausiv1024")]
-[assembly: AssemblyProduct("UrbanAce_7")]
-[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyProduct("H-ElevatorLCDSimulator")]
+[assembly: AssemblyCopyright("Copyright ©  2022 Lausiv1024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
