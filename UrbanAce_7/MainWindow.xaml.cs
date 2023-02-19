@@ -28,11 +28,12 @@ namespace UrbanAce_7
         public static readonly string MainTitle = "Urban Ace";
         public static MainWindow Instance { get; private set; }
 
-        private const int WinWidth = 500;
-        private const int WinHeight = 600;
+        private const int WinWidth = 520;
+        private const int WinHeight = 620;
 
         WaveOut WaveOut;
 
+        private bool loopCanceled;
 
         //Full:0,Withcontent:1
         private int displayMode = 0;
@@ -44,6 +45,8 @@ namespace UrbanAce_7
         private Setting Setting { get; set; }
         private DispatcherTimer ClockTimer;
         private int ClockMode = 0;
+
+        private SimulationContext Current;
 
         private bool IsResizable
         {
@@ -102,11 +105,11 @@ namespace UrbanAce_7
         private void updateClock()
         {
             var now = DateTime.Now;
-            FullScreen.Time.Text = now.ToString("M/d     H:mm");
+            FullScreen.Time.Text = now.ToString("M/d      H:mm");
             ClockMode = 1 - ClockMode;
             FullScreen.Day.Text = ClockMode == 0 ? now.ToString("(ddd)") : UAUtil.GetUsDayOfWeek(now.DayOfWeek);
 
-            WithContent.Time.Text = now.ToString("M/d     H:mm");
+            WithContent.Time.Text = now.ToString("M/d      H:mm");
             WithContent.Day.Text = ClockMode == 0 ? now.ToString("(ddd)") : UAUtil.GetUsDayOfWeek(now.DayOfWeek);
 
         }
@@ -148,29 +151,14 @@ namespace UrbanAce_7
             {
                 WithContent.INSTANCE.DoArrowAnim();
             }
-            if (e.Key == Key.Escape) this.Close();
-        }
-
-        private void SetPanel(int Id)
-        {
-            switch (Id)
+            if (e.Key == Key.Escape)
             {
-                case 0:
-                    WithContent.INSTANCE.FloorName.Focus();
-                    WithContent.INSTANCE.webView.Dispose();
-                    WithContent.INSTANCE.webView = null;
-                    var c = new Setting();
-                    NavigationService.Navigate(c);
-                    ResizeMode = ResizeMode.CanResize;
-                    break;
-                case 2:
-                    WindowState = WindowState.Normal;
-                    Width = 500;
-                    Height = 600;
-                    ResizeMode = ResizeMode.CanMinimize;
-                    var wc = new WithContent();
-                    NavigationService.Navigate(wc);
-                    break;
+                if (Current == null) return;
+                if (!Current.Loop) return;
+                loopCanceled = true;
+                WithContent.LoopMode.Text = "Loop Canceled";
+                await Task.Delay(500);
+                WithContent.LoopMode.Text = "";
             }
         }
 
@@ -252,6 +240,8 @@ namespace UrbanAce_7
             WithContent.Contents = contents;
             bool hasTwitterFunc = UABaseContent.hasContentRequireTwitterAPI(contents);
             int count = 0;
+            Current = context;
+            loopCanceled = false;
             #endregion
             do
             {
@@ -266,7 +256,7 @@ namespace UrbanAce_7
                         await ToNextFloor(context.startPos == 0 ? ElevatorDirection.UP : ElevatorDirection.DOWN, false, start);
                 }
                 count++;
-            } while (context.Loop);
+            } while (context.Loop && !loopCanceled);
 
             BackToSetting();
         }
@@ -293,7 +283,6 @@ namespace UrbanAce_7
             {
                 if (twitterContents.Where(c => c is RandomTL).Count() > 0)
                 {
-                    Console.WriteLine("Getting Home Timeline");
                     await UAUtil.GetTimeLine(UAUtil.AuthData);
                 }
                 UAUtil.UserTweets.Clear();
@@ -302,7 +291,6 @@ namespace UrbanAce_7
                 users.ForEach(async c =>
                 {
                     var u = c as UserTweet;
-                    Console.WriteLine($"Getting {u.UserName}'s Tweet.");
                     await UAUtil.GetUserTweets(UAUtil.AuthData, u.UserName);
                     await Task.Delay(500);
                     count--;
@@ -368,7 +356,9 @@ namespace UrbanAce_7
         {
             if (!(WithContent.webView is null))
                 WithContent.webView.Dispose();
+            Current = null;
             WithContent.webView = null;
+            IsResizable = true;
             WithContent.Reset();
             NavigationService.Navigate(Setting);
             ClockTimer.Stop();

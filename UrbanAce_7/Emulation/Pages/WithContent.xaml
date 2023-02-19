@@ -6,10 +6,10 @@
       xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
       xmlns:local="clr-namespace:UrbanAce_7" MouseDown="Page_MouseDown"
       mc:Ignorable="d" Unloaded="Page_Unloaded"
-      d:DesignHeight="600" d:DesignWidth="500"
-      Title="WithContent">
+      d:DesignHeight="620" d:DesignWidth="520"
+      Title="WithContent" Background="Black">
 
-    <Grid Background="{Binding Background}" Name="MainCanvas">
+    <Grid Background="{Binding Background}" Name="MainCanvas" Margin="20, 15">
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="72"/>
@@ -24,7 +24,7 @@
             <Canvas x:Name="ArrowRenderer" Margin="20,10,20,24" Background="{Binding Background}"/>
 
             <Rectangle x:Name="ArrowRenderElement1" Fill="{Binding Background}" Margin="0,0,0,150"/>
-            <TextBlock x:Name="FloorName" Text="1" Grid.Column="1" FontFamily="Segoe UI" Margin="16,-20,60,0" FontSize="192" 
+            <TextBlock x:Name="FloorName" Text="6" Grid.Column="1" FontFamily="Segoe UI" Margin="-10,-20,20,0" FontSize="190" 
                        HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground}"
                        FontWeight="SemiBold" FontStyle="Italic" Padding="0,0,0,0"/>
         </Grid>
@@ -36,18 +36,18 @@
                    FontFamily="Segoe UI" FontStyle="Italic" FontWeight="SemiBold"
                    VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0"/>
         <TextBlock Name="Ord" Grid.Row="1" FontSize="40" Foreground="{Binding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                   FontFamily="Segoe UI" FontWeight="SemiBold" Text="" Margin="6"/>
+                   FontFamily="Segoe UI" FontWeight="SemiBold" Margin="6"/>
 
         <Grid Grid.Row="2" Name="InfoGrid" Background="Black">
             <Image x:Name="IntroOrWarn" Stretch="UniformToFill"/>
             <Image x:Name="SimpleImg"/>
-            <Grid x:Name="News" Background="#808080" Visibility="Hidden">
+            <Grid x:Name="News" Background="#808080" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="34"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Rectangle Fill="#494949"/>
-                <Rectangle Fill="White" Margin="7,4,465,4"/>
+                <Rectangle Fill="White" Margin="7,4,445,4"/>
                 <TextBlock Text="今日のニュース" Margin="25,0,0,0" VerticalAlignment="Center" FontFamily="BIZ UDPゴシック" Foreground="White" FontSize="20" FontWeight="Bold"/>
                 <TextBlock x:Name="NewsText" Grid.Row="1" Text="" Foreground="White" Margin="8" TextAlignment="Left"
                            FontSize="35" FontWeight="Black" FontFamily="BIZ UDゴシック" TextWrapping="WrapWithOverflow" />
@@ -61,9 +61,9 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Rectangle Fill="#10598a"/>
-                <Rectangle Fill="White" Margin="7,4,465,4"/>
-                <TextBlock x:Name="TweetTitle" Text="" Margin="25,0,0,0" VerticalAlignment="Center" FontFamily="BIZ UDPゴシック" Foreground="White" FontSize="20" FontWeight="Bold"/>
-                <TextBlock x:Name="TweetText" Grid.Row="1" Text="どうもこんにちは、らうしぶですよろしくおねがいします" Foreground="White" Margin="8" TextAlignment="Left"
+                <Rectangle Fill="White" Margin="7,4,445,4"/>
+                <TextBlock x:Name="TweetTitle" Margin="25,0,0,0" VerticalAlignment="Center" FontFamily="BIZ UDPゴシック" Foreground="White" FontSize="20" FontWeight="Bold"/>
+                <TextBlock x:Name="TweetText" Grid.Row="1" Foreground="White" Margin="8" TextAlignment="Left"
                            FontSize="35" FontWeight="Black" FontFamily="BIZ UDPゴシック" TextWrapping="WrapWithOverflow"/>
             </Grid>
         </Grid>
@@ -71,8 +71,10 @@
         <Grid Background="#494949" Grid.Row="3">
             <TextBlock x:Name="Time" Text="8/11     19:19" VerticalAlignment="Center" HorizontalAlignment="Right"
                        Foreground="White" FontSize="32" FontFamily="BIZ UDPゴシック" FontWeight="Bold" Margin="0,0,5,0"/>
-            <TextBlock x:Name="Day" Text="(水)" Foreground="White" FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="322,0,0,11"
+            <TextBlock x:Name="Day" Text="(水)" Foreground="White" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="302,17,0,8"
                        FontFamily="BIZ UDPゴシック" FontWeight="Bold"/>
+            <TextBlock x:Name="LoopMode" Foreground="White" FontFamily="BIZ UDPゴシック" FontWeight="Bold"/>
         </Grid>
+        <Rectangle Fill="Black" Margin="0,-90,0,159"/>
     </Grid>
 </Page>

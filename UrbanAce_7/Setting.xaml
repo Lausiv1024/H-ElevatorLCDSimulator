@@ -7,7 +7,7 @@
       mc:Ignorable="d"  Loaded="Page_Loaded"
       d:DesignHeight="600" d:DesignWidth="500"
       Title="Setting">
-    <Grid>
+    <Grid x:Name="AllParent">
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="64"/>

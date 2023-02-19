@@ -92,8 +92,10 @@ namespace UrbanAce_7
             var client = new TwitterClient(auth.ConsumerKey, auth.ConsumerSecret,
                 auth.AccessToken, auth.AccessTokenSecret);
             var tl = await client.Timelines.GetUserTimelineAsync(userId);
-            UserTweets.AddRange(tl.Where(s => !s.IsRetweet).Where(s => s.Media.Count == 0).Where(t => !t.FullText.Contains("@")).Where(t => t.FullText.Count(r => r == '\n') < 5)
-                .Where(s => !s.FullText.Contains("https://")).Where(s => !s.FullText.Contains("http://")));
+            UserTweets.AddRange(tl.Where(s => s.Media.Count == 0).Where(t => !t.FullText.Contains("@"))
+                .Where(t => t.FullText.Count(r => r == '\n') < 5)
+                .Where(s => !s.FullText.Contains("https://"))
+                .Where(s => !s.FullText.Contains("http://")).Where(t => t.FullText.Length < 90));
         }
 
         public static async Task GetTimeLine(TwitterAPIAuthData auth)
@@ -101,7 +103,8 @@ namespace UrbanAce_7
             var client = new TwitterClient(auth.ConsumerKey, auth.ConsumerSecret,
                 auth.AccessToken, auth.AccessTokenSecret);
             var tl = await client.Timelines.GetHomeTimelineAsync();
-            TLTweets = tl.Where(s => !s.IsRetweet).Where(s => s.Media.Count == 0).Where(s => !s.FullText.Contains("https://")).Where(t => !t.FullText.Contains("@")).Where(t => t.FullText.Count(r => r == '\n') < 5)
+            TLTweets = tl.Where(s => !s.IsRetweet).Where(s => s.Media.Count == 0).Where(s => !s.FullText.Contains("https://"))
+                .Where(t => !t.FullText.Contains("@")).Where(t => t.FullText.Count(r => r == '\n') < 5).Where(t => t.FullText.Length < 90)
                 .ToArray();
         }
     }

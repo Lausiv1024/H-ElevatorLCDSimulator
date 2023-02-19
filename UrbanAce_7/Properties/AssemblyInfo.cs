@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("UrbanAce_7")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Lausiv1024")]
 [assembly: AssemblyProduct("UrbanAce_7")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]

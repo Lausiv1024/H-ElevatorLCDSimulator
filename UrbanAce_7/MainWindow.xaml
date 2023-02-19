@@ -5,5 +5,5 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" MinWidth="500"
         xmlns:local="clr-namespace:UrbanAce_7" Closing="NavigationWindow_Closing" MinHeight="600"
         mc:Ignorable="d" ResizeMode="CanMinimize" ShowsNavigationUI="False" KeyDown="NavigationWindow_KeyDown"
-        Title="Urban Ace" Height="600" Width="500">
+        Title="Urban Ace" Height="620" Width="520">
 </NavigationWindow>

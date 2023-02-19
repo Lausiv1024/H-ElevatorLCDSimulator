@@ -201,7 +201,7 @@ namespace UrbanAce_7
         private void UpdateClock()
         {
             var now = DateTime.Now;
-            Time.Text = now.ToString("M/d     H:mm");
+            Time.Text = now.ToString("M/d      H:mm");
         }
 
         public void onArrive()
@@ -410,9 +410,13 @@ namespace UrbanAce_7
             } else
             {
                 Clear__DEBUG_C();
-                drawArrow(d == ElevatorDirection.DOWN);
-                var img = ArrowRenderer.Children[0] as Image;
-                elementFadeIn(img);
+                delayDo(50, () =>
+                {
+                    drawArrow(d == ElevatorDirection.DOWN);
+                    var img = ArrowRenderer.Children[0] as Image;
+                    elementFadeIn(img);
+                });
+                
             }
         }
 

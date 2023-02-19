@@ -5,15 +5,15 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:UrbanAce_7"
       mc:Ignorable="d" Loaded="PostInit" Unloaded="Page_Unloaded"
-      d:DesignHeight="600" d:DesignWidth="500"
+      d:DesignHeight="600" d:DesignWidth="500" Background="Black"
       Title="FullScreen">
-    <Grid Background="{Binding Background}" Margin="0,-60,0,-60">
+    <Grid Background="{Binding Background}" Margin="20, 15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="100"/>
+            <RowDefinition Height="20"/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition Height="100"/>
-            <RowDefinition Height="108"/>
+            <RowDefinition Height="48"/>
         </Grid.RowDefinitions>
         <Canvas x:Name="ArrowRenderer" Grid.Row="1" Margin="155,16" Background="{Binding Background}"/>
         <TextBlock x:Name="FloorText" Text="1" Grid.Row="2" FontFamily="Segoe UI" FontWeight="SemiBold" Foreground="{Binding Foreground}"
@@ -21,9 +21,9 @@
         <TextBlock Name="InfoText" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                    FontFamily="BIZ UDゴシック" Text="" Margin="20" FontSize="42" FontWeight="Bold"/>
         <Grid Background="#494949" Grid.Row="4">
-            <TextBlock x:Name="Time" Text="8/11     19:19" VerticalAlignment="Top" HorizontalAlignment="Right"
-                       Foreground="White" FontSize="32" FontFamily="BIZ UDPゴシック" FontWeight="Bold" Margin="0,8,5,0"/>
-            <TextBlock x:Name="Day" Text="(水)" Foreground="White" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="322,17,0,8"
+            <TextBlock x:Name="Time" Text="8/11      19:19" VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Foreground="White" FontSize="32" FontFamily="BIZ UDPゴシック" FontWeight="Bold" Margin="0,0,5,0"/>
+            <TextBlock x:Name="Day" Text="(水)" Foreground="White" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="302,17,0,8"
                        FontFamily="BIZ UDPゴシック" FontWeight="Bold"/>
         </Grid>
     </Grid>

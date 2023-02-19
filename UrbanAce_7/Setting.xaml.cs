@@ -233,7 +233,7 @@ namespace UrbanAce_7
         {
             if (FloorList.Items.Count < 2) return;
             var contentList = createListFromCollection();
-            StartButton.IsEnabled = false;
+            AllParent.IsEnabled = false;
             if (contentList.Where(s => s.requireAuth).Count() != 0)
             {
                 try
@@ -245,8 +245,8 @@ namespace UrbanAce_7
                     });
                 } catch
                 {
-                    StartButton.IsEnabled = true;
                     MessageBox.Show("Twitter APIの認証に失敗しました。");
+                    AllParent.IsEnabled = true;
                     return;
                 }
 
@@ -393,7 +393,7 @@ namespace UrbanAce_7
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            StartButton.IsEnabled = true;
+            AllParent.IsEnabled = true;
         }
 
         private void ImportSettingFromFile(string path)
