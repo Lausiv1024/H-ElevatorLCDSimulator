@@ -29,7 +29,7 @@ Windows8以降
 
 ## 使い方
 ### 導入
-まず、[Releases](https://github.com/Lausiv1024/H-ElevatorLCDEmulator/releases)にアクセスし最新版のH-ElevatorLCDEmulator.zipをダウンロードします。
+まず、[Releases](https://github.com/Lausiv1024/H-ElevatorLCDSimulator/releases)にアクセスし最新版のH-ElevatorLCDSimulator.zipをダウンロードします。
 
 その後ダウンロードしたzipを解凍してください
 ### 実行について
